@@ -67,10 +67,10 @@ Stack families in `stacks/` (`bench list` shows which are ready):
 | Prefix | What varies | Held constant |
 |---|---|---|
 | `ref-pipeline` | the control: ElevenLabs Scribe v2 RT · GPT-5.4 mini · ElevenLabs Flash v2.5 | |
-| `stt-*` | the STT (Munsit, Nabrah, Sarj, Fanar, Speechmatics, Soniox, Deepgram, Azure, Google, AWS...) | ref LLM + TTS |
-| `tts-*` | the TTS (Munsit/Faseeh, Sarj, Fanar, CAMB.AI, Azure Gulf voices, Polly, Cartesia, ElevenLabs v3/v4...) | ref STT + LLM |
+| `stt-*` | the STT (HUMAIN, Munsit, Nabrah, Sarj, Fanar, Speechmatics, Soniox, Deepgram, Azure, Google, AWS...) | ref LLM + TTS |
+| `tts-*` | the TTS (HUMAIN, Munsit/Faseeh, Sarj, Fanar, CAMB.AI, Azure Gulf voices, Polly, Cartesia, ElevenLabs v3/v4...) | ref STT + LLM |
 | `llm-*` | the LLM (Fanar, GPT-5.5, Gemini, Claude, local ALLaM / Jais / Falcon / Fanar) | ref STT + TTS |
-| `full-*` | a vendor's own speech in and out (Munsit, Sarj, Fanar) | ref LLM |
+| `full-*` | a vendor's own speech in and out (HUMAIN, Munsit, Sarj, Fanar) | ref LLM |
 | `s2s-*` | speech-to-speech models (OpenAI Realtime, Gemini Live, xAI Grok Voice) | |
 | `agent-*` | hosted agents by phone (15 platforms) | |
 | `local-all_*` | the LLM, everything on this Mac (Whisper turbo + macOS voices) | local STT + TTS |
@@ -88,7 +88,7 @@ Stack families in `stacks/` (`bench list` shows which are ready):
 | MBZUAI IFM (Jais 3) | Abu Dhabi | Jais 3 7B locally | `local-all_whisper_jais-3-7b_macvoice` |
 | TII (Falcon) | Abu Dhabi | Falcon-H1 7B, Falcon 3 7B locally | `local-all_whisper_falcon-*` |
 | Maqsam, Hamsa, Unifonic, Hams.AI, Dayl, ZIWO, Wittify, Sawt, Arabic.AI | KSA / UAE | voice agent by phone (pilot number) | `agent-*` |
-| HUMAIN Voice | Riyadh | needs an adapter (Socket.IO ASR) | none yet |
+| HUMAIN Voice | Riyadh | STT (Arabic-English code-switch), TTS, via `bench/adapters/humain.py` | `stt-humain`, `tts-humain`, `full-humain` |
 
 `docs/providers-research.md` has the research summary and sources. Vendor claims are unverified until benchmarked.
 

@@ -28,9 +28,14 @@ providers:
   - TTS nebula + voices from list_voices()
   how_to_test: Custom LiveKit STT (Socket.IO realtime client) + custom TTS (stream PCM16 24 kHz) in a pipeline with a fixed
     LLM; compare against Munsit/Nabrah/ElevenLabs on the same scenarios.
-  paths: []
-  stacks: []
-  status: Needs an adapter (Socket.IO realtime ASR, HTTP streaming TTS) around the humain-voice SDK; API access flow unclear.
+  paths:
+  - plugin
+  stacks:
+  - stt-humain
+  - tts-humain
+  - full-humain
+  status: Adapter bench/adapters/humain.py (batch ASR per utterance, streaming TTS) around the official SDK; untested until
+    a key is added. API access flow unclear (self-serve page vs approved access).
   confidence: medium
   sources:
   - https://voice.humain.com/

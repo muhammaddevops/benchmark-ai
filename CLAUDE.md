@@ -27,8 +27,9 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
      <scenario>` for the user to paste into the platform; they give you the agent's number; it goes in `.env` as
      `<X>_AGENT_NUMBER`. Needs `BENCH_SIP_TRUNK_ID` once (`scripts/setup_sip.py --apply`, **only with the user's
      OK**: it changes their Twilio and LiveKit accounts) and Twilio geo permissions for the country dialled.
-   - **WebSocket/web API only** (HUMAIN Voice, Hamsa STT/TTS): a bridge in `bench/bridges/` or a `plugin: custom`
-     factory (`bench/factories.py`).
+   - **SDK or WebSocket API only** (no LiveKit plugin): a `plugin: custom` adapter in `bench/adapters/`
+     (`humain.py` wraps HUMAIN's SDK as a LiveKit STT/TTS: copy it for Hamsa etc.), or, for a whole hosted agent, a
+     bridge in `bench/bridges/`.
    - **Open model on this Mac**: `plugin: ollama` (`ollama pull hf.co/<repo>:<quant>`); the `local-all_*` family
      holds the local speech constant so only the LLM changes.
 3. **Smoke-build**: `.venv/bin/python -m bench list` shows the stack as ready. For our own agent's stacks also

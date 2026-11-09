@@ -1,0 +1,18 @@
+# HUMAIN Voice (Riyadh, PIF) ASR, code-switch model bayan_cs_ar_en_v2, via bench/adapters/humain.py.
+# Keys: HUMAIN_VOICE_API_KEY + HUMAIN_VOICE_API_URL (from HUMAIN's onboarding).
+# STT swap of ref-pipeline.
+name: HUMAIN bayan_cs_ar_en_v2 · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: HUMAIN STT (Saudi)
+display_sub: HUMAIN bayan_cs_ar_en_v2 · ref LLM + TTS
+provider: humain + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: custom
+  factory: bench.adapters.humain:stt_factory
+  options: {model: bayan_cs_ar_en_v2, language: codeswitch}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Fast Transcription per utterance (VAD), not HUMAIN''s realtime
+  stream: latency is an upper bound.'
+requires: [HUMAIN_VOICE_API_KEY, HUMAIN_VOICE_API_URL]

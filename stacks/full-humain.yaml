@@ -1,0 +1,18 @@
+# HUMAIN Voice speech in and out (Saudi) with the reference LLM. Keys: HUMAIN_VOICE_API_KEY + HUMAIN_VOICE_API_URL.
+name: HUMAIN ASR · GPT-5.4 mini · HUMAIN Nebula
+display: HUMAIN (Saudi)
+display_sub: HUMAIN ASR · GPT-5.4 mini · Nebula
+provider: humain + openai
+kind: pipeline
+stt:
+  plugin: custom
+  factory: bench.adapters.humain:stt_factory
+  options: {model: bayan_cs_ar_en_v2, language: codeswitch}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: custom
+  factory: bench.adapters.humain:tts_factory
+  options: {model: nebula}
+turn_detection: turn-detector
+requires: [HUMAIN_VOICE_API_KEY, HUMAIN_VOICE_API_URL]
+notes: Vendor speech stack via bench/adapters/humain.py (batch ASR per utterance).

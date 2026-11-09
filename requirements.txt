@@ -34,6 +34,7 @@ livekit-plugins-microsoft-ai==1.8.11
 livekit-plugins-nabrah==1.8.11      # Nabrah (Saudi) STT, official LiveKit plugin
 livekit-plugins-cambai==1.8.11      # CAMB.AI (Dubai) MARS TTS, official LiveKit plugin
 livekit-plugins-munsit==0.4.0       # Munsit/Faseeh (CNTXT, UAE) STT+TTS, published by the vendor
+humain-voice==0.18.1               # HUMAIN Voice (Saudi) SDK, used by bench/adapters/humain.py
 # free local speech (bench/localspeech.py, Apple silicon)
 mlx-whisper==0.4.3; sys_platform == "darwin"
 # videos and charts
