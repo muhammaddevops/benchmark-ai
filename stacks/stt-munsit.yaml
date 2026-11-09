@@ -1,0 +1,13 @@
+# Munsit (CNTXT AI, Abu Dhabi): Arabic-first streaming STT, Arabic-English code-switch model.
+# Key: MUNSIT_API_KEY (munsit.com). Plugin: livekit-plugins-munsit (published by CNTXT).
+# STT swap of ref-pipeline.
+name: Munsit munsit-en-ar · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Munsit STT (UAE)
+display_sub: Munsit munsit-en-ar · ref LLM + TTS
+provider: munsit + openai + elevenlabs
+kind: pipeline
+stt: {plugin: munsit, model: munsit-en-ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

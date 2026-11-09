@@ -1,0 +1,18 @@
+# Sarj speech in and out (Saudi) with the reference LLM. Keys: SARJ_STT_API_KEY, SARJ_TTS_API_KEY.
+name: Sarj STT · GPT-5.4 mini · Sarj TTS
+display: Sarj (Saudi)
+display_sub: Sarj STT · GPT-5.4 mini · Sarj TTS
+provider: sarj + openai
+kind: pipeline
+stt: {plugin: openai, base_url: 'https://stt-rnnt-ar.sarj.ai/openai/v1', api_key_env: SARJ_STT_API_KEY, model: sarj-stt,
+  language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: openai
+  base_url: https://sarj-omni-tts.sarj.ai/v1
+  api_key_env: SARJ_TTS_API_KEY
+  model: sarj-tts
+  voice: ars_male
+  kwargs: {response_format: wav}
+turn_detection: turn-detector
+notes: 'Vendor speech stack: STT and TTS from the vendor, the reference LLM (GPT-5.4 mini) as the brain.'

@@ -1,0 +1,13 @@
+name: ElevenLabs Scribe v2 RT (0.6s VAD) · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: ElevenLabs (tuned)
+display_sub: "Scribe v2 · GPT-5.4 mini · Flash v2.5"
+provider: elevenlabs + openai
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra: {server_vad: {vad_silence_threshold_secs: 0.6}}   # default is 1.5 s -> ~1.5 s transcript delay
+llm: {model: openai/gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: Same as eleven-scribe_gpt54mini_eleven-flash but with Scribe's server VAD silence cut from 1.5 s to 0.6 s.

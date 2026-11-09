@@ -1,0 +1,17 @@
+# Fanar Aura STT (QCRI, Doha). Key: FANAR_API_KEY (api.fanar.qa/request; approval needed).
+# STT swap of ref-pipeline.
+name: Fanar Aura STT-1 · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Fanar STT (Qatar)
+display_sub: Fanar Aura STT-1 · ref LLM + TTS
+provider: fanar + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: openai
+  base_url: https://api.fanar.qa/v1
+  api_key_env: FANAR_API_KEY
+  model: Fanar-Aura-STT-1
+  kwargs: {detect_language: true}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Batch STT via LiveKit VAD.'

@@ -1,0 +1,17 @@
+# Google Gemini 3 Flash (Gemini API, OpenAI-compatible endpoint). Key: GOOGLE_API_KEY.
+# LLM swap of ref-pipeline.
+name: Scribe v2 RT · Gemini 3 Flash · ElevenLabs Flash v2.5
+display: Gemini 3 Flash
+display_sub: LLM swap · ref STT + TTS
+provider: elevenlabs + google
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai-compatible, base_url: 'https://generativelanguage.googleapis.com/v1beta/openai/', api_key_env: GOOGLE_API_KEY,
+  model: gemini-3-flash}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'LLM test: only the LLM differs from ref-pipeline.'

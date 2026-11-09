@@ -1,0 +1,12 @@
+# xAI Grok speech-to-text. Key: XAI_API_KEY.
+# STT swap of ref-pipeline.
+name: Grok STT · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: xAI STT
+display_sub: Grok STT · ref LLM + TTS
+provider: xai + openai + elevenlabs
+kind: pipeline
+stt: {plugin: xai, language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

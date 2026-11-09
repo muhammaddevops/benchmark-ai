@@ -1,0 +1,15 @@
+# ALLaM 7B (Saudi, SDAIA/HUMAIN) via Ollama with the reference speech (ElevenLabs). Pull once: ollama pull hf.co/bartowski/ALLaM-AI_ALLaM-7B-Instruct-preview-GGUF:Q4_K_M
+name: Scribe v2 RT · ALLaM 7B (local) · ElevenLabs Flash v2.5
+display: ALLaM 7B · Saudi
+display_sub: local LLM · ref STT + TTS
+provider: elevenlabs + local (allam-7b)
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: ollama, model: 'hf.co/bartowski/ALLaM-AI_ALLaM-7B-Instruct-preview-GGUF:Q4_K_M', max_tokens: 220}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'LLM test: only the LLM differs from ref-pipeline.'

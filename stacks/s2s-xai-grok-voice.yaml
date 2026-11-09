@@ -1,0 +1,8 @@
+# xAI Grok Voice speech-to-speech. Key: XAI_API_KEY.
+name: xAI grok-voice-3.0 (speech-to-speech)
+display: xAI Grok Voice
+display_sub: grok-voice-3.0 · speech-to-speech
+provider: xai
+kind: realtime
+realtime: {plugin: xai, model: grok-voice-3.0}
+notes: Vendor default voice (Ara) and server VAD.

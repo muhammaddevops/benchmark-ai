@@ -1,0 +1,10 @@
+name: ElevenLabs Scribe v2 RT · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: ElevenLabs
+display_sub: "Scribe v2 · GPT-5.4 mini · Flash v2.5"
+provider: elevenlabs + openai
+kind: pipeline
+stt: {plugin: elevenlabs, model: scribe_v2_realtime}        # auto language detection
+llm: {model: openai/gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}   # "Sarah", verified ar+en
+turn_detection: turn-detector
+notes: BYOK ElevenLabs (your key) for STT+TTS, LLM via LiveKit Inference. Vendor defaults (Scribe server VAD 1.5 s).

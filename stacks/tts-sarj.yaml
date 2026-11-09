@@ -1,0 +1,23 @@
+# Sarj TTS (Riyadh), Saudi voice ars_male (Abdullah); others: ars_female, nourah, ars_fares.
+# Key: SARJ_TTS_API_KEY.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · sarj-tts · Abdullah
+display: Sarj TTS (Saudi)
+display_sub: sarj-tts · Abdullah · ref STT + LLM
+provider: elevenlabs + openai + sarj
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: openai
+  base_url: https://sarj-omni-tts.sarj.ai/v1
+  api_key_env: SARJ_TTS_API_KEY
+  model: sarj-tts
+  voice: ars_male
+  kwargs: {response_format: wav}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

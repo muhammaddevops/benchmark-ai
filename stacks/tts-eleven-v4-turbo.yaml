@@ -1,0 +1,16 @@
+# ElevenLabs v4 Turbo (reported better Saudi Arabic). Key: ELEVEN_LABS.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · Eleven v4 Turbo
+display: ElevenLabs v4 Turbo
+display_sub: Eleven v4 Turbo · ref STT + LLM
+provider: elevenlabs + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_v4_turbo, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

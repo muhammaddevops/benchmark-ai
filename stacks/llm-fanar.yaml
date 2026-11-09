@@ -1,0 +1,10 @@
+# Isolates Fanar's LLM: same speech in/out as the reference stack (ElevenLabs), only the brain changes.
+name: ElevenLabs Scribe v2 RT · Fanar · ElevenLabs Flash v2.5
+display: Fanar LLM + ElevenLabs
+display_sub: "Scribe v2 · Fanar (QCRI) · Flash v2.5"
+provider: fanar + elevenlabs
+kind: pipeline
+stt: {plugin: elevenlabs, model: scribe_v2_realtime, extra: {server_vad: {vad_silence_threshold_secs: 0.6}}}
+llm: {plugin: openai-compatible, base_url: "https://api.fanar.qa/v1", api_key_env: FANAR_API_KEY, model: Fanar}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector

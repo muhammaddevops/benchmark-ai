@@ -1,0 +1,12 @@
+# Template for a hosted voice agent reached by phone. Copy to stacks/<provider>-phone.yaml, set the names, and put
+# the agent's number in .env under number_env. The agent must be configured with `bench brief <scenario>`.
+name: Provider X voice agent (phone)
+display: Provider X
+display_sub: "hosted agent · via phone"
+provider: provider-x
+kind: phone
+phone:
+  number_env: PROVIDERX_AGENT_NUMBER     # E.164, e.g. +9665XXXXXXXX
+  trunk_env: BENCH_SIP_TRUNK_ID          # created by scripts/setup_sip.py
+disabled: true
+notes: Black box. Latency includes the phone network. Record the platform's voice, model and language settings here.

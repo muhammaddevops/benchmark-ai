@@ -1,0 +1,43 @@
+# core
+livekit-agents[silero,turn-detector,elevenlabs]==1.8.11
+livekit-api>=1.2.2
+python-dotenv
+pyyaml
+jiwer
+numpy
+openai
+aiohttp
+# provider plugins (all pinned to the agents version); add more with `pip install livekit-plugins-<name>==1.8.11`
+livekit-plugins-openai==1.8.11
+livekit-plugins-google==1.8.11
+livekit-plugins-azure[realtime]==1.8.11
+livekit-plugins-aws[realtime]==1.8.11
+livekit-plugins-deepgram==1.8.11
+livekit-plugins-speechmatics==1.8.11
+livekit-plugins-cartesia==1.8.11
+livekit-plugins-soniox==1.8.11
+livekit-plugins-gladia==1.8.11
+livekit-plugins-assemblyai==1.8.11
+livekit-plugins-hume==1.8.11
+livekit-plugins-anthropic==1.8.11
+livekit-plugins-groq==1.8.11
+livekit-plugins-neuphonic==1.8.11
+livekit-plugins-rime==1.8.11
+livekit-plugins-inworld==1.8.11
+livekit-plugins-lmnt==1.8.11
+livekit-plugins-sarvam==1.8.11
+livekit-plugins-mistralai==1.8.11
+livekit-plugins-xai==1.8.11
+livekit-plugins-telnyx==1.8.11
+livekit-plugins-microsoft-ai==1.8.11
+# Gulf vendors
+livekit-plugins-nabrah==1.8.11      # Nabrah (Saudi) STT, official LiveKit plugin
+livekit-plugins-cambai==1.8.11      # CAMB.AI (Dubai) MARS TTS, official LiveKit plugin
+livekit-plugins-munsit==0.4.0       # Munsit/Faseeh (CNTXT, UAE) STT+TTS, published by the vendor
+# free local speech (bench/localspeech.py, Apple silicon)
+mlx-whisper==0.4.3; sys_platform == "darwin"
+# videos and charts
+playwright
+pillow
+jinja2
+websockets

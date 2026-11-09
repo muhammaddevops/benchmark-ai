@@ -1,0 +1,16 @@
+# Mistral Voxtral TTS (code-mixing). Key: MISTRAL_API_KEY. Plugin default voice.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · Voxtral mini TTS 3
+display: Mistral Voxtral TTS
+display_sub: Voxtral mini TTS 3 · ref STT + LLM
+provider: elevenlabs + openai + mistralai
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: mistralai, model: voxtral-mini-tts-3}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

@@ -1,0 +1,15 @@
+# Everything on this Mac, no cloud speech or LLM credits: the baseline every provider should beat.
+# STT: Whisper large-v3-turbo (mlx-whisper, language ID restricted to Arabic/English)
+# LLM: Qwen3 8B via Ollama   TTS: macOS voices (Majed for Arabic, Samantha for English, switched per phrase)
+name: Whisper turbo (local) · Qwen3 8B (local) · macOS voices
+display: All-local baseline (Mac)
+display_sub: "Whisper turbo · Qwen3 8B · macOS Majed/Samantha"
+provider: local
+kind: pipeline
+stt: {plugin: localspeech}
+llm: {plugin: ollama, model: "qwen3:8b", max_tokens: 220}
+tts: {plugin: localspeech, voice: auto}
+turn_detection: turn-detector
+notes: >-
+  Free local baseline on an M4 Pro. Batch Whisper after end of speech (no streaming STT) and robotic system
+  voices: expect slower and less natural replies than hosted stacks. Not a product; label it "local baseline".

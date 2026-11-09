@@ -1,0 +1,16 @@
+# The reference pipeline: the control every component test is compared against (all bring-your-own-key).
+# STT ElevenLabs Scribe v2 Realtime (0.6 s VAD) · LLM OpenAI GPT-5.4 mini · TTS ElevenLabs Flash v2.5.
+# Component stacks (stt-*, llm-*, tts-*) copy this and swap exactly one part.
+name: 'Reference: Scribe v2 RT · GPT-5.4 mini · ElevenLabs Flash v2.5'
+display: Reference pipeline
+display_sub: Scribe v2 · GPT-5.4 mini · Flash v2.5
+provider: elevenlabs + openai
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector

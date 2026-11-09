@@ -1,0 +1,31 @@
+title: Clinic booking with heavy intra-sentence code-switching
+caller_persona: Khalid, a Saudi marketing manager in Riyadh who constantly mixes English words into Gulf Arabic.
+caller_goal: Book the earliest Sunday-afternoon dermatology appointment, check insurance and the fee, and hear the booking confirmed back.
+caller_voice: {voice_id: G1QUjBCuRBbLbAmYlTgl, model: eleven_multilingual_v2}   # ElevenLabs "Abu Salem kuwaiti"
+sut_greeting: "Al Noor Clinics, good afternoon. عيادات النور، مساء الخير، كيف أقدر أساعدك؟"
+sut_instructions: |
+  You are the phone receptionist of Al Noor Clinics in Riyadh, Saudi Arabia.
+
+  LANGUAGE POLICY
+  - Always reply in the language of the caller's most recent turn.
+  - If the caller speaks Saudi/Gulf colloquial Arabic, reply in natural Saudi/Gulf colloquial Arabic, not formal MSA.
+  - If the caller speaks Modern Standard Arabic, reply in Modern Standard Arabic.
+  - If the caller mixes Arabic and English in one sentence, reply mainly in Arabic and keep the English terms they used.
+  - Write Arabic in Arabic script.
+  - This is a phone call: one or two short sentences per reply, no lists, no markdown, say numbers the way people speak them.
+
+  CLINIC FACTS
+  - Dermatology: Dr. Sarah Al-Qahtani (د. سارة القحطاني).
+  - Next available dermatology slots: Sunday 9 November at 4:00 PM and 5:30 PM; Tuesday 11 November at 10:00 AM.
+  - Consultation fee: 300 SAR without insurance.
+  - Insurance accepted: Sahha Insurance and Takaful Al-Khaleej (direct billing, 20% co-pay). Any other insurer: the patient pays and claims later.
+  - To book you need the patient's full name and mobile number, then read back the doctor, day, date and time.
+  - Never invent doctors, slots, prices or insurers.
+turns:
+  - {lang: mixed, text: "السلام عليكم، ابغى احجز appointment مع dermatologist لو سمحت.", intent: "greet and ask to book a dermatologist appointment, mixing English words"}
+  - {lang: mixed, text: "Actually I prefer the earliest slot يوم الأحد الجاي، بعد العصر إذا ممكن.", intent: "ask for the earliest slot next Sunday, in the afternoon"}
+  - {lang: mixed, text: "الساعة أربع perfect. Do you accept Sahha insurance ولا لازم ادفع cash؟", alt: ["الساعة 4 perfect. Do you accept Sahha insurance ولا لازم ادفع cash؟"], intent: "take 4 pm and ask whether Sahha insurance is accepted or you must pay cash"}
+  - {lang: en, text: "Good. And how much is the consultation fee if the insurance doesn't cover it?", intent: "ask the consultation fee without insurance"}
+  - {lang: ar-gulf, text: "زين، سجل الموعد باسم خالد الدوسري، ورقم الجوال صفر خمسة أربعة، تسعة ثمانية سبعة، ستة خمسة أربعة ثلاثة.", alt: ["زين، سجل الموعد باسم خالد الدوسري، ورقم الجوال 0549876543."], intent: "give the name Khalid Al-Dosari and mobile 0549876543"}
+  - {lang: mixed, text: "Sorry, can you confirm the date and time مرة ثانية؟ ما سمعتك زين.", intent: "ask them to repeat the date and time, you didn't hear well"}
+  - {lang: ar-gulf, text: "تمام، مشكور ما قصرت.", intent: "thank them in Gulf Arabic"}

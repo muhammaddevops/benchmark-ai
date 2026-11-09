@@ -1,0 +1,15 @@
+# Runs with only the ElevenLabs key: speech in/out by ElevenLabs, the "brain" is a local open model (Ollama).
+# The reference stack for proving the pipeline, and the template for testing any LLM in the same voice setup.
+name: ElevenLabs Scribe v2 RT · Qwen3 8B (local) · ElevenLabs Flash v2.5
+display: Qwen3 8B (local) + ElevenLabs
+display_sub: "Scribe v2 · Qwen3 8B on a Mac · Flash v2.5"
+provider: elevenlabs + ollama
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra: {server_vad: {vad_silence_threshold_secs: 0.6}}
+llm: {plugin: ollama, model: "qwen3:8b", max_tokens: 220}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: Local LLM on this Mac; response times include Ollama on Apple silicon, not a datacentre GPU.

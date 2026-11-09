@@ -1,0 +1,16 @@
+# Azure Neural TTS, Saudi voice ar-SA-HamedNeural. Keys: AZURE_SPEECH_KEY + AZURE_SPEECH_REGION.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · ar-SA Hamed
+display: Azure TTS
+display_sub: ar-SA Hamed · ref STT + LLM
+provider: elevenlabs + openai + azure
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: azure, voice: ar-SA-HamedNeural, language: ar-SA}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

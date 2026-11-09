@@ -1,0 +1,12 @@
+# Mistral Voxtral realtime transcription. Key: MISTRAL_API_KEY.
+# STT swap of ref-pipeline.
+name: Voxtral mini realtime 3 · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Mistral Voxtral STT
+display_sub: Voxtral mini realtime 3 · ref LLM + TTS
+provider: mistralai + openai + elevenlabs
+kind: pipeline
+stt: {plugin: mistralai, model: voxtral-mini-transcribe-realtime-3, language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

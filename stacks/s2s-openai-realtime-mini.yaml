@@ -1,0 +1,8 @@
+# OpenAI gpt-realtime-2.1-mini speech-to-speech (cheaper/faster). Key: OPENAI_API_KEY.
+name: OpenAI gpt-realtime-2.1-mini (speech-to-speech)
+display: OpenAI Realtime mini
+display_sub: gpt-realtime-2.1-mini · speech-to-speech
+provider: openai
+kind: realtime
+realtime: {plugin: openai, model: gpt-realtime-2.1-mini, voice: marin}
+notes: Server-side turn detection (vendor default).

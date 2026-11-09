@@ -1,0 +1,14 @@
+# Azure AI Speech (Microsoft; UAE North / Qatar Central regions). Keys: AZURE_SPEECH_KEY + AZURE_SPEECH_REGION.
+# STT swap of ref-pipeline.
+name: Azure Speech ar-SA + en-US · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Azure STT
+display_sub: Azure Speech ar-SA + en-US · ref LLM + TTS
+provider: azure + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: azure
+  language: [ar-SA, en-US]
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Continuous language ID between ar-SA and en-US.'

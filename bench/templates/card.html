@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@500;700&display=block" rel="stylesheet">
+<style>
+  :root { --bg: #0b1220; --text: #eef2f7; --muted: #a8b4c7; --dim: #6f7d95; --accent: #2fc6b6; --caller: #e3b65b; --line: #23314d; --u: 1px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); overflow: hidden;
+    font-family: "Inter", "SF Pro Display", -apple-system, system-ui, sans-serif; }
+  .wrap { position: absolute; inset: 0; display: grid; align-content: center; padding: calc(90 * var(--u)) calc(110 * var(--u));
+    background: radial-gradient(1200px 700px at 50% -10%, #16223b 0%, var(--bg) 62%); }
+  .kicker { font-size: calc(22 * var(--u)); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: calc(76 * var(--u)); font-weight: 800; line-height: 1.06; letter-spacing: -.015em; margin-top: calc(18 * var(--u)); max-width: calc(1500 * var(--u)); }
+  .ar { font-family: "IBM Plex Sans Arabic", sans-serif; color: var(--caller); font-size: calc(40 * var(--u)); margin-top: calc(14 * var(--u)); font-weight: 700; }
+  p.lede { font-size: calc(30 * var(--u)); color: var(--muted); margin-top: calc(26 * var(--u)); line-height: 1.4; max-width: calc(1400 * var(--u)); }
+  ul { list-style: none; display: flex; flex-wrap: wrap; gap: calc(14 * var(--u)); margin-top: calc(40 * var(--u)); }
+  li { font-size: calc(24 * var(--u)); font-weight: 600; border: calc(2 * var(--u)) solid var(--line); border-radius: 999px; padding: calc(10 * var(--u)) calc(22 * var(--u)); color: var(--text); }
+  .foot { position: absolute; left: calc(110 * var(--u)); right: calc(110 * var(--u)); bottom: calc(70 * var(--u)); font-size: calc(20 * var(--u)); color: var(--dim); line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker" id="kicker"></div>
+  <h1 id="title"></h1>
+  <div class="ar" id="ar" dir="rtl"></div>
+  <p class="lede" id="lede"></p>
+  <ul id="items"></ul>
+  <div class="foot" id="foot"></div>
+</div>
+<script>
+window.setup = function (c, fmt) {
+  const base = { landscape: 1920, square: 1080 / 0.62, vertical: 1080 / 0.72, portrait: 1080 / 0.66 }[fmt] || 1920;
+  document.documentElement.style.setProperty('--u', (window.innerWidth / base) + 'px');
+  document.getElementById('kicker').textContent = c.kicker || '';
+  document.getElementById('title').textContent = c.title || '';
+  document.getElementById('ar').textContent = c.ar || '';
+  document.getElementById('lede').textContent = c.lede || '';
+  const ul = document.getElementById('items'); ul.innerHTML = '';
+  for (const it of c.items || []) { const li = document.createElement('li'); li.textContent = it; ul.appendChild(li); }
+  document.getElementById('foot').textContent = c.foot || '';
+  return document.fonts.ready.then(() => true);
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Faseeh TTS by Munsit (CNTXT AI, Abu Dhabi), Najdi (central Saudi) male voice. Key: MUNSIT_API_KEY.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · Faseeh v1 · Najdi male
+display: Munsit TTS (UAE)
+display_sub: Faseeh v1 · Najdi male · ref STT + LLM
+provider: elevenlabs + openai + munsit
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: munsit, model: faseeh-v1-preview, voice: ar-najdi-male-2}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

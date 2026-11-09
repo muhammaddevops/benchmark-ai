@@ -1,0 +1,16 @@
+# Qwen3 8B on this Mac (Ollama), no key.
+# LLM swap of ref-pipeline.
+name: Scribe v2 RT · Qwen3 8B (local) · ElevenLabs Flash v2.5
+display: Qwen3 8B (local)
+display_sub: LLM swap · ref STT + TTS
+provider: elevenlabs + ollama
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: ollama, model: 'qwen3:8b', max_tokens: 220}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'LLM test: only the LLM differs from ref-pipeline.'

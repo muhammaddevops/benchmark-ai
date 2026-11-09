@@ -1,0 +1,10 @@
+name: Deepgram Nova-3 (multi) · GPT-5.4 mini · Cartesia Sonic-3
+display: Deepgram + Cartesia
+display_sub: "Nova-3 · GPT-5.4 mini · Sonic-3"
+provider: deepgram + openai + cartesia
+kind: pipeline
+stt: {model: deepgram/nova-3, language: multi}
+llm: {model: openai/gpt-5.4-mini}
+tts: {model: cartesia/sonic-3, language: ar}
+turn_detection: turn-detector
+notes: All via LiveKit Inference. Sonic-3 pinned to Arabic; English replies go through the same voice.

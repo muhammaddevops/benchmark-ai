@@ -1,0 +1,15 @@
+# Sarj (Riyadh): Saudi Arabic STT behind an OpenAI-compatible endpoint (batch after end of speech).
+# Key: SARJ_STT_API_KEY (platform.sarj.ai).
+# STT swap of ref-pipeline.
+name: Sarj sarj-stt · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Sarj STT (Saudi)
+display_sub: Sarj sarj-stt · ref LLM + TTS
+provider: sarj + openai + elevenlabs
+kind: pipeline
+stt: {plugin: openai, base_url: 'https://stt-rnnt-ar.sarj.ai/openai/v1', api_key_env: SARJ_STT_API_KEY, model: sarj-stt,
+  language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Batch STT via LiveKit VAD (Sarj''s streaming WebSocket would need
+  an adapter). Arabic only: English turns are a stress test.'

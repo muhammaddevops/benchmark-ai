@@ -1,0 +1,23 @@
+# Fanar Aura TTS-2 (QCRI, Doha), voice Hamad. Key: FANAR_API_KEY. Default quota: about 20 TTS requests a day.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · Aura TTS-2 · Hamad
+display: Fanar TTS (Qatar)
+display_sub: Aura TTS-2 · Hamad · ref STT + LLM
+provider: elevenlabs + openai + fanar
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: openai
+  base_url: https://api.fanar.qa/v1
+  api_key_env: FANAR_API_KEY
+  model: Fanar-Aura-TTS-2
+  voice: Hamad
+  kwargs: {response_format: wav}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline. Ask Fanar for a higher TTS quota first: a 3-scenario run needs
+  about 25 requests.'

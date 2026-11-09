@@ -1,0 +1,1549 @@
+generated: '2026-11-10'
+about: Gulf voice AI providers (domestic + global) and how each is tested here. Built from desk research on 2026-11-10 (see
+  sources); vendor claims are unverified until benchmarked. `bench providers` shows live readiness.
+providers:
+- id: humain-voice
+  name: HUMAIN Voice (HUMAIN, PIF)
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - speech-to-speech (announced, undocumented)
+  arabic:
+    gulf_dialects: 'Marketed: Saudi, Khaleeji, Egyptian, Levantine, Maghrebi with automatic dialect detection (15+ dialects
+      in production per HUMAIN pages; the docs'' dialect list is empty)'
+    code_switching: 'Yes: language `codeswitch` (SDK Language.ArEn) with ASR model bayan_cs_ar_en / bayan_cs_ar_en_v2'
+  access: 'Ambiguous: landing page shows self-serve plans (free 5,000 credits, no card; SAR 49-649/month), but the auth
+    docs say keys come through ''your organization''s approved access flow'''
+  livekit_plugin: null
+  env_keys:
+  - HUMAIN_VOICE_API_KEY
+  - HUMAIN_VOICE_API_URL
+  test_models:
+  - ASR bayan_cs_ar_en_v2 (code-switch)
+  - ASR bayan_ar
+  - ASR nida_ar
+  - ASR nida_8k_ar (8 kHz telephony, batch only in SDK 0.18)
+  - TTS nebula + voices from list_voices()
+  how_to_test: Custom LiveKit STT (Socket.IO realtime client) + custom TTS (stream PCM16 24 kHz) in a pipeline with a fixed
+    LLM; compare against Munsit/Nabrah/ElevenLabs on the same scenarios.
+  paths: []
+  stacks: []
+  status: Needs an adapter (Socket.IO realtime ASR, HTTP streaming TTS) around the humain-voice SDK; API access flow unclear.
+  confidence: medium
+  sources:
+  - https://voice.humain.com/
+  - https://docs.voice.humain.com/
+  - https://docs.voice.humain.com/en/md/models
+  - https://docs.voice.humain.com/en/md/authentication
+- id: humain-allam
+  name: HUMAIN ALLaM (LLM)
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - LLM
+  arabic:
+    gulf_dialects: Arabic-first LLM; Saudi cultural tuning claimed
+    code_switching: Text-level Arabic/English
+  access: ALLaM 34B only in the HUMAIN Chat consumer app (developer API 'coming soon' per secondary sources); 13B on IBM
+    watsonx (sdaia/allam-1-13b-instruct); 7B in Azure AI Foundry catalog (ALLaM-2-7b-instruct); Microsoft announced (Aug
+    2026) bringing ALLaM into Foundry
+  livekit_plugin: No dedicated plugin; use livekit-plugins-openai against an OpenAI-compatible host (Azure Foundry endpoint,
+    or local Ollama/llama-server)
+  env_keys:
+  - AZURE_OPENAI_API_KEY / AZURE_OPENAI_ENDPOINT
+  - OLLAMA_BASE_URL
+  test_models:
+  - humain-ai/ALLaM-7B-Instruct-preview (local GGUF)
+  - ALLaM-2-7b-instruct (Azure Foundry)
+  - sdaia/allam-1-13b-instruct (watsonx)
+  how_to_test: Run ALLaM-7B locally via Ollama as the LLM in a fixed STT/TTS pipeline (LLM-only swap); judge Gulf-dialect
+    answer quality.
+  paths:
+  - local
+  - plugin
+  stacks:
+  - local-all_whisper_allam-7b_macvoice
+  - llm-allam-7b-local
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://huggingface.co/humain-ai/ALLaM-7B-Instruct-preview
+  - https://lmmarketcap.com/reports/allam
+  - https://news.microsoft.com/source/emea/2026/08/microsoft-and-humain-announce-long-term-strategic-collaboration-to-enable-ai-transformation-in-saudi-arabia-and-beyond-2/
+  - https://vision2030.ai/analysis/humain-allam-microsoft-foundry-enterprise-ai/
+- id: munsit-faseeh
+  name: Munsit + Faseeh (CNTXT AI; Actualize acquired)
+  hq: UAE (Abu Dhabi)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - voice cloning
+  - translation
+  arabic:
+    gulf_dialects: 'TTS dialect param auto | emirati | fusha; voices named by dialect (Najdi, Hijazi, UAE...); Faseeh launch
+      PR: Emirati-neutral, Najdi, Hijazi, Kuwaiti, Omani, Qatari among 12+ dialects; separate ''Munsit Emirati TTS'' (Apr
+      2026)'
+    code_switching: STT model munsit-en-ar (language auto | ar | en | ar-en)
+  access: 'Self-serve dashboard app.munsit.com (UAE: ae.app.munsit.com)'
+  livekit_plugin: livekit-plugins-munsit 0.4.0 (by CNTXT; consolidates livekit-plugins-faseeh 0.1.5) - munsit.STT (streaming
+    WS /api/v1/listen, server turn detection) + munsit.TTS (streaming)
+  env_keys:
+  - MUNSIT_API_KEY
+  - FASEEH_API_KEY
+  test_models:
+  - STT munsit
+  - STT munsit-en-ar
+  - TTS faseeh-v1-preview voice ar-najdi-male-2
+  - TTS voice ar-uae-male-1
+  - TTS dialect=emirati
+  how_to_test: 'pip install livekit-plugins-munsit; stacks/munsit_*.yaml with plugin: custom (STT munsit-en-ar, TTS faseeh-v1-preview),
+    LLM held constant. Run STT-only and TTS-only swaps too.'
+  paths:
+  - plugin
+  stacks:
+  - stt-munsit
+  - tts-munsit-najdi
+  - tts-munsit-emirati
+  - full-munsit
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.munsit.com/llms.txt
+  - https://docs.munsit.com/openapi.json
+  - https://docs.munsit.com/authentication.md
+  - https://docs.munsit.com/rate-limits.md
+- id: nabrah
+  name: Nabrah (نبرة)
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - voice cloning
+  - voice-agent platform
+  arabic:
+    gulf_dialects: Saudi and Gulf (Khaleeji) focus
+    code_switching: Bilingual Arabic/English 'depending on plan and configuration'
+  access: Self-serve (dashboard app.nabrah.ai, Developers tab)
+  livekit_plugin: livekit-plugins-nabrah 1.8.11 - STT only (wss://api.nabrah.ai/api/ext/stt/ws, recognition_model eot_nabrah,
+    language ar-SA)
+  env_keys:
+  - NABRAH_API_KEY
+  - NABRAH_STT_URL
+  test_models:
+  - STT eot_nabrah (ar-SA)
+  - TTS nabrah_tts_v2 + a public Saudi voice UUID
+  - Nabrah voice agent via SIP
+  how_to_test: STT via the official plugin; TTS via a small custom factory (HTTP stream pcm); also an end-to-end Nabrah
+    agent dialled over a LiveKit SIP outbound trunk (Twilio).
+  paths:
+  - phone
+  - plugin
+  stacks:
+  - stt-nabrah
+  - agent-nabrah
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://www.nabrah.ai/llms.txt
+  - https://www.nabrah.ai/.well-known/agent-skills/SKILL.md
+  - https://pypi.org/project/livekit-plugins-nabrah/
+  - https://github.com/livekit/agents/tree/main/livekit-plugins/livekit-plugins-nabrah
+- id: sarj
+  name: Sarj (سرج)
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - voice-agent platform (outbound calls)
+  arabic:
+    gulf_dialects: Saudi voices; STT language ar only
+    code_switching: Not documented for STT (language=ar only)
+  access: Account at platform.sarj.ai required; self-serve status unclear (site pushes 'book a demo')
+  livekit_plugin: None; STT/TTS are OpenAI-compatible -> livekit-plugins-openai with base_url (TTS https://sarj-omni-tts.sarj.ai/v1,
+    STT https://stt-rnnt-ar.sarj.ai/openai/v1 batch) or a custom WS STT
+  env_keys:
+  - SARJ_API_KEY
+  - SARJ_STT_API_KEY
+  - SARJ_TTS_API_KEY
+  test_models:
+  - STT sarj-stt
+  - TTS sarj-tts voice ars_male
+  - TTS voice ars_female
+  - End-to-end Sarj scenario call
+  how_to_test: 'Component test: openai.TTS(base_url=..., model=''sarj-tts'', voice=''ars_male''); STT via custom WS. Agent
+    test: have Sarj place an outbound call to a Twilio number routed into LiveKit SIP inbound so the scripted caller answers.'
+  paths:
+  - plugin
+  stacks:
+  - stt-sarj
+  - tts-sarj
+  - full-sarj
+  status: 'Its voice agent calls out (REST API dials a number), the reverse of our caller: test its STT/TTS here.'
+  confidence: high
+  sources:
+  - https://www.sarj.ai/llms.txt
+  - https://platform-docs.sarj.ai/llms.txt
+  - https://platform-docs.sarj.ai/getting-started.md
+  - https://platform-docs.sarj.ai/speech-to-text.md
+- id: hamsa
+  name: Hamsa (tryhamsa.com)
+  hq: MENA (exact HQ not confirmed)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - voice cloning
+  - voice-agent platform
+  arabic:
+    gulf_dialects: 'STT: Egyptian, Gulf, Levantine, North African, Iraqi, Yemeni, MSA; TTS voices filterable by dialect
+      (100+ voices)'
+    code_switching: Yes (STT 'handles mixed Arabic-English'); agents have a 'language dialect switcher'
+  access: Self-serve (agents.tryhamsa.com/register, Google/Microsoft sign-in)
+  livekit_plugin: null
+  env_keys:
+  - HAMSA_API_KEY
+  test_models:
+  - Hamsa STT Realtime
+  - Hamsa TTS Realtime (Gulf voice from catalog)
+  - Hamsa voice agent by phone
+  how_to_test: Custom WS STT/TTS factory for a component swap; plus an end-to-end Hamsa agent dialled over SIP.
+  paths:
+  - phone
+  stacks:
+  - agent-hamsa
+  status: STT/TTS need a WebSocket adapter; the agent is testable by phone now.
+  confidence: medium
+  sources:
+  - https://docs.tryhamsa.com/llms.txt
+  - https://docs.tryhamsa.com/overview/models.md
+  - https://docs.tryhamsa.com/overview/capabilities/speech-to-text.md
+  - https://docs.tryhamsa.com/websocket/websocket-api.md
+- id: fanar
+  name: Fanar (QCRI / HBKU)
+  hq: Qatar (Doha)
+  group: domestic
+  types:
+  - LLM
+  - STT
+  - TTS
+  - translation
+  arabic:
+    gulf_dialects: LLM Arabic-centric; voice table lists Arabic voices as 'Standard' accent (OpenAPI example labels Hamad
+      as 'Gulf')
+    code_switching: Not documented
+  access: Request access at https://api.fanar.qa/request (approval)
+  livekit_plugin: None; livekit-plugins-openai with base_url=https://api.fanar.qa/v1 for LLM/TTS; streaming STT needs a
+    custom WS client
+  env_keys:
+  - FANAR_API_KEY
+  test_models:
+  - LLM Fanar-C-2-27B
+  - LLM Fanar-S-1-7B
+  - STT Fanar-3.0-Aura-Transcribe
+  - TTS Fanar-Aura-TTS-2 voice Hamad / Huda
+  how_to_test: LLM swap in a fixed pipeline (fits the rate limit). TTS/STT daily caps (20/50 requests) make full scenario
+    runs impractical without a raised quota - ask support@fanar.qa.
+  paths:
+  - local
+  - plugin
+  stacks:
+  - full-fanar
+  - llm-fanar
+  - stt-fanar
+  - tts-fanar
+  - local-all_whisper_fanar-1-9b_macvoice
+  - llm-fanar-1-9b-local
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://api.fanar.qa/openapi.json
+  - https://api.fanar.qa/docs
+  - https://fdalvi.github.io/blog/2025-12-09-fanar-2-launch/
+  - https://huggingface.co/QCRI
+- id: camb-ai
+  name: CAMB.AI (MARS TTS)
+  hq: UAE (Dubai) / US (San Francisco)
+  group: domestic
+  types:
+  - TTS
+  - dubbing/translation
+  - voice agents (with Hyperfusion)
+  arabic:
+    gulf_dialects: Dialect packs Gulf, Levantine, Egyptian, MSA (company post); German MARS page lists 'Arabic (Saudi Arabia)';
+      Emirati not confirmed
+    code_switching: Not documented
+  access: Self-serve studio (not verified)
+  livekit_plugin: livekit-plugins-cambai 1.8.11 (TTS)
+  env_keys:
+  - CAMB_API_KEY
+  test_models:
+  - mars-flash with an Arabic (Saudi) voice
+  - mars-pro
+  how_to_test: TTS-only swap via livekit-plugins-cambai, holding STT/LLM constant.
+  paths:
+  - plugin
+  stacks:
+  - tts-cambai
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://camb.ai/mars
+  - https://www.camb.ai/de/mars
+  - https://docs.camb.ai/sdk-guides/python-sdk
+  - https://www.camb.ai/blog-post/hyperfusion-and-camb-ai-partner-up
+- id: maqsam
+  name: Maqsam
+  hq: Saudi Arabia (Riyadh; Jordanian origin)
+  group: domestic
+  types:
+  - voice-agent platform
+  - STT (in-house ASR)
+  - cloud contact centre
+  arabic:
+    gulf_dialects: Agent understands GCC, Levantine and Egyptian accents (support docs); Saudi dialect option
+    code_switching: Arabic + English agent
+  access: Sales-only; per-minute AI-agent rate on top of call rates
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - Maqsam Voice AI Agent (inbound number)
+  how_to_test: 'End-to-end phone test only: get a demo/pilot number, dial it from the caller via LiveKit SIP outbound, score
+    from the recording.'
+  paths:
+  - phone
+  stacks:
+  - agent-maqsam
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://support.maqsam.com/maqsam-voice-ai-agent
+  - https://maqsam.com/features/automatic-speech-recognition-(asr)
+  - https://maqsam.com/pricing
+  - https://www.arabnews.pk/node/2589697/saudi-arabia
+- id: unifonic
+  name: Unifonic
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - voice-agent platform
+  - CX/CPaaS
+  arabic:
+    gulf_dialects: Claims 95% Arabic dialect recognition (self-reported)
+    code_switching: Not documented
+  access: Sales
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - Unifonic AI voice agent (demo number)
+  how_to_test: Phone test via a sales-provided demo line only; low reproducibility.
+  paths:
+  - phone
+  stacks:
+  - agent-unifonic
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://www.unifonic.com/en/resources/unifonic-unveils-new-brand-identity-as-saudi-arabias-premier-ai-native-cx-platform
+  - https://groq.com/customer-stories/unifonic-accelerates-arabic-ai-customer-engagement-powered-by-groq-and-humain
+  - https://docs.unifonic.com/llms.txt
+- id: dayl
+  name: Dayl (Neurolab)
+  hq: UAE ('built in the Gulf'; contact @neurolab.ae)
+  group: domestic
+  types:
+  - voice-agent platform
+  - TTS (own 'Farah Foundational' Saudi speech model)
+  - call QA/analytics
+  arabic:
+    gulf_dialects: Saudi and Khaleeji, Emirati greeting variants; mid-call language switching, full-duplex barge-in
+    code_switching: Yes (claimed)
+  access: Quote-based pilots
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - Dayl live agent
+  how_to_test: Manual browser demo for a qualitative clip, or a pilot phone number for a scored SIP test.
+  paths:
+  - phone
+  stacks:
+  - agent-dayl
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://dayl.ai/llms.txt
+- id: hams-ai
+  name: Hams.AI (همس)
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - voice-agent platform
+  - STT
+  - TTS
+  - contact centre
+  arabic:
+    gulf_dialects: 'Saudi and GCC dialects + MSA + English (TTS: Saudi and Gulf voices)'
+    code_switching: Not documented
+  access: Sales/demo
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - Hams Voice agent
+  how_to_test: Phone test through a demo line only.
+  paths:
+  - phone
+  stacks:
+  - agent-hams
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://hams.ai/llms.txt
+  - https://hams.ai/products/text-to-speech/
+  - https://hams.ai/products/speech-to-text/
+- id: ziwo-ai-voice-agent
+  name: ZIWO AI Voice Agent
+  hq: UAE (Dubai)
+  group: domestic
+  types:
+  - voice-agent platform
+  - cloud contact centre
+  arabic:
+    gulf_dialects: Arabic incl. Gulf, Egyptian, Levantine + English (and French per one source); KSA-hosted option
+    code_switching: Not documented
+  access: Demo/sales
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - ZIWO AI Voice Agent
+  how_to_test: Phone test via demo number only.
+  paths:
+  - phone
+  stacks:
+  - agent-ziwo
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://www.ziwo.io/llms.txt
+  - https://www.ziwo.io/sa/product/ai-voice-agent/
+- id: arabic-ai
+  name: Arabic.AI (ex-Tarjama) + HeyBreez
+  hq: UAE (Abu Dhabi/Dubai); HeyBreez MENA
+  group: domestic
+  types:
+  - LLM (Pronoia)
+  - voice-agent platform (Arabic.AI Voice Agentic Platform, with HeyBreez runtime)
+  arabic:
+    gulf_dialects: MSA + Gulf, Levantine, Egyptian, Maghrebi; ElevenLabs voices plus in-house Emirati/Saudi voices (secondary
+      source)
+    code_switching: Arabic-English (claimed)
+  access: Enterprise sales; HeyBreez also sold through partners
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - Arabic.AI voice agent (pilot)
+  how_to_test: Only via an enterprise pilot number; treat as optional.
+  paths:
+  - phone
+  stacks:
+  - agent-arabicai
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://www.wamda.com/en/2026/04/arabicai-partners-heybreez-scale-arabic-voice-ai-enterprises
+  - https://www.wamda.com/en/2026/08/voice-ai-startup-heybreez-raises-2-5-million-seed-round
+  - https://www.heybreez.ai/llms.txt
+  - https://www.wamda.com/en/2025/04/arabicai-launches-mena-b2b-agentic-ai-platform
+- id: wittify-ai
+  name: Wittify.ai
+  hq: Saudi Arabia (Riyadh; offices Dubai, Cairo)
+  group: domestic
+  types:
+  - voice-agent platform
+  - STT
+  - TTS
+  arabic:
+    gulf_dialects: Own ASR/TTS trained on 25+ Arabic dialects (claimed)
+    code_switching: Not documented
+  access: Beta / sales (site blocks automated access)
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: Not testable without a pilot; keep as a watchlist entry.
+  paths:
+  - phone
+  stacks:
+  - agent-wittify
+  status: ready to test once the keys/number are in .env
+  confidence: low
+  sources:
+  - https://www.wamda.com/en/2025/07/wittifyai-secures-1-5-pre-seed-upscale-conversational-ai
+  - https://www.menabytes.com/wittify-pre-seed/
+- id: sawt
+  name: Sawt
+  hq: Saudi Arabia (Riyadh)
+  group: domestic
+  types:
+  - voice-agent platform
+  arabic:
+    gulf_dialects: Arabic-native voice models built in KSA (claimed)
+  access: Sales
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: Watchlist; needs a pilot number.
+  paths:
+  - phone
+  stacks:
+  - agent-sawt
+  status: ready to test once the keys/number are in .env
+  confidence: low
+  sources:
+  - https://www.wamda.com/en/2025/07/sawt-raises-1-million-transform-voice-based-customer-service
+  - https://www.middleeastainews.com/p/saudi-ai-voice-startup-sawt-funding
+- id: intella
+  name: Intella (Intella Voice)
+  hq: Saudi Arabia (moved HQ from Egypt, per Arab News)
+  group: domestic
+  types:
+  - STT
+  - call analytics
+  arabic:
+    gulf_dialects: 25+ dialects/sub-dialects (claimed)
+  access: Sales
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: Not testable without enterprise access.
+  paths: []
+  stacks: []
+  status: No current site or public docs found.
+  confidence: low
+  sources:
+  - https://www.wamda.com/index.php/2025/09/intella-bags-12-5-million-oversubscribed-series
+  - https://www.arabnews.pk/node/2311031/business-economy
+  - https://www.zawya.com/en/press-release/companies-news/intella-partners-with-deepgram-to-build-the-most-inclusive-language-product-on-the-market-h2fji4xr
+- id: lahajati
+  name: Lahajati (لهجاتي)
+  hq: Not confirmed (Arabic-market TTS studio)
+  group: domestic
+  types:
+  - TTS
+  - STT
+  arabic:
+    gulf_dialects: Claims 192+ dialects incl. Saudi (Najdi), Khaleeji, Emirati, Kuwaiti; 600+ voices
+  access: Self-serve
+  livekit_plugin: null
+  env_keys:
+  - LAHAJATI_API_KEY
+  test_models:
+  - Saudi Najdi voice via absolute-control endpoint
+  how_to_test: 'Batch TTS only (likely non-streaming): good for a dialect-fit/MOS listening test, poor for latency.'
+  paths: []
+  stacks: []
+  status: API docs returned 404; batch TTS only.
+  confidence: low
+  sources:
+  - https://lahajati.ai/en
+- id: arabot
+  name: Arabot
+  hq: Saudi Arabia (offices UAE, Jordan)
+  group: domestic
+  types:
+  - chat/WhatsApp agents
+  - voice bots (per 2026 roundup)
+  arabic: {}
+  access: Sales
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: 'Skip: current product is WhatsApp-first; no voice API.'
+  paths: []
+  stacks: []
+  status: WhatsApp-first; no voice API.
+  confidence: low
+  sources:
+  - https://arabot.io/llms.txt
+  - https://www.menabytes.com/arabot-seed/
+- id: inception42-mbzuai-ifm
+  name: Inception42 / MBZUAI IFM (Jais 3, Jais-ASR)
+  hq: UAE (Abu Dhabi)
+  group: domestic
+  types:
+  - LLM (open weights)
+  - STT (open weights)
+  arabic:
+    gulf_dialects: 'Jais-ASR: MSA + 19 dialect codes incl. SA, AE, QA, KW, BH, OM; dialect ID output'
+    code_switching: Jais-ASR code_switch=True keeps EN/FR/ES/IT spans
+  access: None (open weights)
+  livekit_plugin: None; self-host Jais-ASR behind vLLM's OpenAI-compatible endpoint -> livekit openai.STT(base_url=...)
+    (batch with VAD)
+  env_keys: []
+  test_models:
+  - inception42/Jais-3-7B
+  - inception42/Jais-3-MoVA-36B-A4B
+  - IFM/Jais-ASR
+  how_to_test: 'Local: Jais-3 as LLM swap (llama-server; needs recent llama.cpp with K2 Horizon support); Jais-ASR as batch
+    STT behind an OpenAI-compatible server. See local_models.'
+  paths:
+  - local
+  - plugin
+  stacks:
+  - local-all_whisper_jais-3-7b_macvoice
+  - llm-jais-3-7b-local
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://huggingface.co/inception42
+  - https://huggingface.co/IFM/Jais-ASR
+  - https://huggingface.co/IFM/Jais-3-7B-GGUF
+  - https://www.wam.ae/en/article/c2r7j2m-mbzuai-inception42-launch-jais-arabic-models
+- id: tii
+  name: TII (Falcon-H1-Arabic, Falcon-ASR)
+  hq: UAE (Abu Dhabi)
+  group: domestic
+  types:
+  - LLM
+  - STT (announced)
+  arabic:
+    gulf_dialects: Falcon-ASR (1.6B, Oct 2026) targets MSA + Emirati; Falcon-Emirati LLM announced
+    code_switching: 'Falcon-ASR: EN/FR/ES/PT'
+  access: Chat demo chat.falconllm.tii.ae
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - tiiuae/Falcon-H1-7B-Instruct (multilingual incl. ar, open GGUF)
+  how_to_test: LLM-only local swap with Falcon-H1-7B-Instruct; revisit when Falcon-H1-Arabic / Falcon-ASR weights appear.
+  paths:
+  - local
+  - plugin
+  stacks:
+  - local-all_whisper_falcon-h1-7b_macvoice
+  - local-all_whisper_falcon3-7b_macvoice
+  - llm-falcon-h1-7b-local
+  - llm-falcon3-7b-local
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://huggingface.co/blog/tiiuae/falcon-h1-arabic
+  - https://www.zawya.com/en/press-release/companies-news/tii-launches-falcon-emirati-alongside-new-arabic-ai-models-for-speech-and-visual-text-understanding-1523900
+  - https://www.marktechpost.com/2026/10/11/tii-falcon-asr-arabic-speech-recognition/
+  - https://huggingface.co/tiiuae/Falcon-H1-7B-Instruct
+- id: audarai
+  name: AudarAI
+  hq: Reportedly Singapore (Arabic-first)
+  group: domestic
+  types:
+  - STT
+  - TTS
+  - voice agents
+  - translation
+  arabic:
+    gulf_dialects: Training covers Gulf/Emirati, Egyptian, Levantine, Maghrebi (secondary)
+    code_switching: Arabic-English
+  access: Unknown
+  livekit_plugin: null
+  env_keys: []
+  test_models:
+  - audarai/Audar-ASR-V1-Turbo
+  - audarai/Audar-ASR-V1-Flash
+  - audarai/Audar-TTS-V1-Turbo
+  how_to_test: Local batch STT/TTS comparison only.
+  paths: []
+  stacks: []
+  status: Not inspected; low confidence.
+  confidence: low
+  sources:
+  - https://www.audarai.com/llms.txt
+  - https://huggingface.co/audarai/Audar-ASR-V1-Turbo
+  - https://www.producthunt.com/products/audar-asr-v1
+- id: elevenlabs
+  name: ElevenLabs
+  hq: US / UK (New York, London)
+  group: global
+  types:
+  - TTS
+  - STT
+  - voice-agent platform (ElevenAgents)
+  - speech-to-speech (Eleven Realtime)
+  arabic:
+    gulf_dialects: No dialect parameter; eleven_multilingual_v2 lists 'Arabic (Saudi Arabia, UAE)'; Saudi-accent voices
+      exist in the Voice Library (reseller listing); Eleven v4 reported to improve Saudi Arabic (press)
+    code_switching: Multilingual models; not documented as a feature
+  access: Self-serve
+  livekit_plugin: livekit-plugins-elevenlabs 1.8.11 (STT + TTS)
+  env_keys:
+  - ELEVEN_API_KEY
+  test_models:
+  - scribe_v2_realtime
+  - eleven_flash_v2_5
+  - eleven_v3_conversational
+  - eleven_v4_turbo
+  - eleven_realtime_v1_mini
+  - eleven_realtime_v1_max
+  how_to_test: Already in repo (Scribe + Flash stacks). Add eleven_v4_turbo / v3_conversational TTS variants, and try Eleven
+    Realtime through openai.realtime.RealtimeModel(base_url=...) if the compatibility claim holds. Mind the 3-concurrent-request
+    cap.
+  paths:
+  - phone
+  - plugin
+  stacks:
+  - ref-pipeline
+  - tts-eleven-v3
+  - tts-eleven-v4-turbo
+  - agent-elevenlabs
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://elevenlabs.io/docs/overview/models
+  - https://elevenlabs.io/docs/capabilities/speech-to-text
+  - https://elevenlabs.io/docs/changelog/2026/10/19
+  - https://www.vktr.com/ai-platforms/elevenlabs-launches-eleven-v4-and-v4-turbo/
+- id: openai
+  name: OpenAI
+  hq: US
+  group: global
+  types:
+  - speech-to-speech
+  - STT
+  - TTS
+  - LLM
+  arabic:
+    gulf_dialects: No dialect control; Arabic listed among supported realtime languages
+    code_switching: Implicit (multilingual model)
+  access: Self-serve
+  livekit_plugin: livekit-plugins-openai (RealtimeModel, STT, TTS, LLM); also LiveKit Inference openai/gpt-realtime-2.1
+  env_keys:
+  - OPENAI_API_KEY
+  test_models:
+  - gpt-realtime-2.1
+  - gpt-realtime-2.1-mini
+  - gpt-live-transcribe (streaming STT)
+  - gpt-transcribe
+  - gpt-4o-transcribe
+  - gpt-4o-mini-tts
+  how_to_test: Already in repo (openai-gpt-realtime-2.1). Add -mini and a gpt-live-transcribe STT-only variant.
+  paths:
+  - plugin
+  stacks:
+  - s2s-openai-realtime
+  - s2s-openai-realtime-mini
+  - stt-openai
+  - tts-openai
+  - llm-gpt-5.5
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://developers.openai.com/api/docs/models/gpt-realtime-2.1
+  - https://community.openai.com/t/new-realtime-models-on-the-api-gpt-realtime-2-1-and-gpt-realtime-2-1-mini/1385896
+  - https://developers.openai.com/api/docs/guides/text-to-speech.md
+  - https://developers.openai.com/api/docs/guides/speech-to-text.md
+- id: google
+  name: Google (Gemini Live, Gemini Transcribe/TTS, Cloud Chirp 3)
+  hq: US
+  group: global
+  types:
+  - speech-to-speech
+  - STT
+  - TTS
+  - LLM
+  arabic:
+    gulf_dialects: 'Cloud STT chirp_3: ar-SA, ar-AE, ar-QA, ar-KW, ar-BH, ar-OM (Preview) + ar-XA; Gemini Live: Arabic `ar`
+      among 99 languages; Gemini 3.5 Transcribe lists ar-EG (auto-detect + code-mixing); Gemini TTS: Egyptian Arabic, Standard
+      Arabic; Cloud TTS: ar-XA (MSA) only'
+    code_switching: 'Gemini 3.5 Transcribe: mid-session code-mixing; Chirp 3: language_codes=[''auto''] or list'
+  access: Self-serve
+  livekit_plugin: livekit-plugins-google (realtime, Gemini STT/TTS, Cloud STT/TTS); LiveKit Inference google/gemini-3.8-live,
+    google/gemini-3.5-transcribe-live
+  env_keys:
+  - GOOGLE_API_KEY
+  - GOOGLE_APPLICATION_CREDENTIALS + GOOGLE_CLOUD_PROJECT
+  test_models:
+  - gemini-3.8-live
+  - gemini-3.8-live-extended-thinking
+  - gemini-3.5-transcribe-live
+  - gemini-3.8-flash-tts
+  - chirp_3 ar-SA
+  - ar-XA-Chirp3-HD-Charon
+  how_to_test: Already in repo (google-gemini-live, gemini-transcribe stack). Add gemini-3.8-live and a Chirp 3 ar-SA STT-only
+    variant.
+  paths:
+  - plugin
+  stacks:
+  - s2s-gemini-live
+  - stt-google
+  - tts-google-chirp3
+  - llm-gemini-3-flash
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://aistudio.google.com/docs/models/gemini-3.8-live.md
+  - https://aistudio.google.com/docs/live-api/capabilities.md
+  - https://aistudio.google.com/docs/models/gemini-3.5-transcribe.md
+  - https://aistudio.google.com/docs/speech-generation.md
+- id: microsoft-azure-ai-speech-voice-live-mai
+  name: Microsoft Azure AI Speech / Voice Live / MAI
+  hq: US
+  group: global
+  types:
+  - STT
+  - TTS
+  - speech-to-speech (Voice Live)
+  arabic:
+    gulf_dialects: STT real-time for ar-SA, ar-AE, ar-QA, ar-KW, ar-BH, ar-OM (+13 other ar-*); 'LLM Speech' for ar-SA/ar-BH/ar-EG;
+      TTS per-Gulf-locale voices (all Standard neural, no HD)
+    code_switching: Voice Live multilingual auto-mode excludes Arabic - set language explicitly (up to 10 locales); MAI-Transcribe-2
+      supports `ar`
+  access: Self-serve (Azure account)
+  livekit_plugin: livekit-plugins-azure (STT, TTS, Voice Live realtime); livekit-plugins-microsoft-ai (MAI-Voice-2-Flash
+    TTS, MAI STT)
+  env_keys:
+  - AZURE_SPEECH_KEY
+  - AZURE_SPEECH_REGION
+  - AZURE_VOICE_LIVE_ENDPOINT
+  - AZURE_VOICE_LIVE_API_KEY
+  - MICROSOFT_AI_TTS_REGION / MICROSOFT_AI_TTS_URL
+  test_models:
+  - STT ar-SA (+ ar-AE)
+  - TTS ar-SA-HamedNeural
+  - TTS ar-AE-FatimaNeural
+  - Voice Live gpt-realtime + azure-speech ar-SA
+  - mai-transcribe-2
+  how_to_test: 'Pipeline: Azure STT ar-SA + fixed LLM + Azure TTS per Gulf locale (one stack per voice pair). Use a UAE/Qatar
+    Azure region for fair latency.'
+  paths:
+  - plugin
+  stacks:
+  - stt-azure
+  - tts-azure-hamed
+  - tts-azure-fatima
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
+  - https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt
+  - https://learn.microsoft.com/en-us/azure/ai-services/speech-service/voice-live-language-support
+  - https://pypi.org/project/livekit-plugins-azure/
+- id: deepgram
+  name: Deepgram
+  hq: US
+  group: global
+  types:
+  - STT
+  - TTS
+  - voice-agent API
+  arabic:
+    gulf_dialects: 'Nova-3 Arabic (Jan 2026): ar, ar-AE, ar-SA, ar-QA, ar-KW, ar-SY, ar-LB, ar-PS, ar-JO, ar-EG, ar-SD,
+      ar-TD, ar-MA, ar-DZ, ar-TN, ar-IQ, ar-IR (no ar-BH/ar-OM codes)'
+    code_switching: nova-3 multilingual (language=multi) now lists Arabic; Flux Multilingual (10 langs) has no Arabic
+  access: Self-serve
+  livekit_plugin: livekit-plugins-deepgram; LiveKit Inference deepgram/nova-3
+  env_keys:
+  - DEEPGRAM_API_KEY
+  test_models:
+  - nova-3 language=ar-SA
+  - nova-3 language=ar-AE
+  - nova-3 language=multi
+  how_to_test: Already in repo (nova-3 stack). Add ar-SA vs multi variants; TTS must come from another vendor.
+  paths:
+  - plugin
+  stacks:
+  - stt-deepgram
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://developers.deepgram.com/docs/models-languages-overview.md
+  - https://deepgram.com/learn/nova-3-arabic-speech-to-text-production-grade-stt
+  - https://developers.deepgram.com/docs/flux/language-prompting.md
+  - https://developers.deepgram.com/docs/tts-models.md
+- id: speechmatics
+  name: Speechmatics
+  hq: UK (Cambridge)
+  group: global
+  types:
+  - STT
+  - TTS
+  - voice-agent API
+  arabic:
+    gulf_dialects: Global Arabic `ar` covers MSA, Gulf, Egyptian, Levantine
+    code_switching: Bilingual pack ar_en; Melia 1 multilingual (56 langs) realtime preview
+  access: Self-serve
+  livekit_plugin: livekit-plugins-speechmatics (agent STT on linden-1); LiveKit Inference speechmatics/linden-1
+  env_keys:
+  - SPEECHMATICS_API_KEY
+  test_models:
+  - linden-1 language=ar
+  - linden-1 language=ar_en
+  - melia-1 (preview)
+  how_to_test: 'STT-only swap: ar vs ar_en on mixed scenarios (code-switch is its selling point).'
+  paths:
+  - plugin
+  stacks:
+  - stt-speechmatics
+  - stt-speechmatics-ar_en
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.speechmatics.com/speech-to-text/languages.md
+  - https://docs.speechmatics.com/integrations-and-sdks/livekit/stt.md
+  - https://docs.speechmatics.com/llms.txt
+  - https://www.speechmatics.com/company/articles-and-news/your-voice-agent-speaks-perfect-arabic-thats-the-problem
+- id: soniox
+  name: Soniox
+  hq: US
+  group: global
+  types:
+  - STT
+  - TTS
+  - translation
+  arabic:
+    gulf_dialects: Arabic `ar` incl. Gulf (marketing)
+    code_switching: Yes (core feature; language_hints)
+  access: Self-serve
+  livekit_plugin: livekit-plugins-soniox
+  env_keys:
+  - SONIOX_API_KEY
+  test_models:
+  - stt-rt-v6 language_hints=['ar','en']
+  how_to_test: STT-only swap; strong candidate for the code-switch scenarios.
+  paths:
+  - plugin
+  stacks:
+  - stt-soniox
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.soniox.com/stt/models.mdx
+  - https://docs.soniox.com/stt/concepts/supported-languages.mdx
+  - https://soniox.com/platform/arabic
+  - https://soniox.com/text-to-speech/arabic
+- id: assemblyai
+  name: AssemblyAI
+  hq: US
+  group: global
+  types:
+  - STT
+  - TTS
+  arabic:
+    gulf_dialects: Not dialect-specific
+    code_switching: 'Universal-3.6 Pro Realtime: native code-switching across 32 langs incl. Arabic `ar`'
+  access: Self-serve
+  livekit_plugin: livekit-plugins-assemblyai; LiveKit Inference assemblyai/universal-3-6-pro
+  env_keys:
+  - ASSEMBLYAI_API_KEY
+  test_models:
+  - universal-3-6-pro language_codes=['ar','en']
+  how_to_test: STT-only swap.
+  paths:
+  - plugin
+  stacks:
+  - stt-assemblyai
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://www.assemblyai.com/docs/streaming/select-the-speech-model.md
+  - https://www.assemblyai.com/docs/streaming/multilingual-transcription.md
+- id: gladia
+  name: Gladia
+  hq: France
+  group: global
+  types:
+  - STT
+  arabic:
+    gulf_dialects: Not dialect-specific
+    code_switching: Yes (explicit language list)
+  access: Self-serve
+  livekit_plugin: livekit-plugins-gladia
+  env_keys:
+  - GLADIA_API_KEY
+  test_models:
+  - solaria-3 (ar)
+  - solaria-1
+  how_to_test: STT-only swap.
+  paths:
+  - plugin
+  stacks:
+  - stt-gladia
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.gladia.io/chapters/language/supported-languages.md
+  - https://docs.gladia.io/chapters/introduction/models.md
+- id: cartesia
+  name: Cartesia
+  hq: US
+  group: global
+  types:
+  - TTS
+  - STT
+  arabic:
+    gulf_dialects: Locale codes supported via `locale` (Arabic regional locales not checked)
+  access: Self-serve
+  livekit_plugin: livekit-plugins-cartesia; LiveKit Inference cartesia/sonic-3.5 (3.6 not yet in the installed literals)
+  env_keys:
+  - CARTESIA_API_KEY
+  test_models:
+  - sonic-3.6 language=ar + an Arabic voice
+  how_to_test: Already in repo (sonic-3); add sonic-3.6.
+  paths:
+  - plugin
+  stacks:
+  - tts-cartesia
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.cartesia.ai/build-with-cartesia/tts-models/latest.md
+  - https://docs.cartesia.ai/build-with-cartesia/stt/latest.md
+- id: amazon-web-services
+  name: Amazon Web Services (Transcribe, Polly, Nova Sonic)
+  hq: US
+  group: global
+  types:
+  - STT
+  - TTS
+  - speech-to-speech
+  arabic:
+    gulf_dialects: Transcribe ar-AE = 'Arabic, Gulf' (batch+streaming), ar-SA = MSA; Polly ar-AE Hala (F) / Zayd (M) neural,
+      arb Zeina (standard)
+    code_switching: Not documented
+  access: Self-serve
+  livekit_plugin: livekit-plugins-aws (Transcribe STT, Polly TTS, Bedrock LLM, Nova Sonic realtime)
+  env_keys:
+  - AWS_ACCESS_KEY_ID
+  - AWS_SECRET_ACCESS_KEY
+  - AWS_REGION
+  test_models:
+  - Transcribe ar-AE
+  - Polly Hala (neural, ar-AE)
+  - Polly Zayd (neural, ar-AE)
+  how_to_test: Pipeline stack Transcribe ar-AE + fixed LLM + Polly Zayd; use me-central-1 (UAE) region.
+  paths:
+  - plugin
+  stacks:
+  - stt-aws-gulf
+  - tts-aws-polly-zayd
+  status: ready to test once the keys/number are in .env
+  confidence: high
+  sources:
+  - https://docs.aws.amazon.com/polly/latest/dg/available-voices.html
+  - https://docs.aws.amazon.com/transcribe/latest/dg/supported-languages.html
+  - https://docs.aws.amazon.com/nova/latest/userguide/speech.html
+- id: xai
+  name: xAI (Grok Voice)
+  hq: US
+  group: global
+  types:
+  - speech-to-speech
+  - TTS
+  - STT
+  - LLM
+  arabic:
+    gulf_dialects: TTS language codes include ar-EG, ar-SA, ar-AE
+    code_switching: auto language detect
+  access: Self-serve
+  livekit_plugin: livekit-plugins-xai; LiveKit Inference xai/grok-voice-3.0, xai/stt-1, xai/tts-1
+  env_keys:
+  - XAI_API_KEY
+  test_models:
+  - grok-voice-3.0
+  - grok-voice-transcribe-2.0
+  - tts language=ar-SA
+  how_to_test: Realtime stack swap.
+  paths:
+  - plugin
+  stacks:
+  - s2s-xai-grok-voice
+  - stt-xai
+  - tts-xai
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://docs.x.ai/developers/model-capabilities/audio/text-to-speech
+  - https://docs.x.ai/developers/model-capabilities/audio/voice
+- id: mistral-ai
+  name: Mistral AI (Voxtral)
+  hq: France
+  group: global
+  types:
+  - STT
+  - TTS
+  - LLM
+  arabic:
+    gulf_dialects: Not dialect-specific
+    code_switching: TTS supports code-mixing
+  access: Self-serve
+  livekit_plugin: livekit-plugins-mistralai (LLM, STT voxtral-mini-transcribe-realtime-3, TTS voxtral-mini-tts-3)
+  env_keys:
+  - MISTRAL_API_KEY
+  test_models:
+  - voxtral-mini-transcribe-realtime-3
+  - voxtral-mini-tts-3
+  how_to_test: STT and TTS swaps.
+  paths:
+  - plugin
+  stacks:
+  - stt-mistral-voxtral
+  - tts-mistral-voxtral
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://docs.mistral.ai/capabilities/audio/text_to_speech
+  - https://pypi.org/project/livekit-plugins-mistralai/
+- id: cohere
+  name: Cohere (Transcribe Arabic)
+  hq: Canada
+  group: global
+  types:
+  - STT
+  arabic:
+    gulf_dialects: Benchmarked on MSA, Egyptian, Gulf, Levantine, Maghrebi
+    code_switching: Arabic-English
+  access: Self-serve
+  livekit_plugin: null
+  env_keys:
+  - COHERE_API_KEY
+  test_models:
+  - cohere-transcribe-arabic-07-2026
+  how_to_test: Batch STT accuracy test (custom factory with VAD), or local open weights.
+  paths: []
+  stacks: []
+  status: Batch-only Arabic STT (no streaming); needs a custom factory.
+  confidence: medium
+  sources:
+  - https://huggingface.co/blog/CohereLabs/cohere-transcribe-arabic-07-2026-release
+  - https://docs.cohere.com/docs/transcribe-arabic
+  - https://cohere.com/blog/transcribe-arabic
+- id: telnyx
+  name: Telnyx
+  hq: US (MENA infrastructure)
+  group: global
+  types:
+  - telephony/SIP
+  - voice-agent platform
+  - STT
+  - TTS
+  arabic:
+    gulf_dialects: NaturalHD Arabic voices claim Gulf prosody
+  access: Self-serve
+  livekit_plugin: livekit-plugins-telnyx (STT, TTS)
+  env_keys:
+  - TELNYX_API_KEY
+  test_models:
+  - Telnyx.Bayan TTS
+  - basira STT
+  - NaturalHD voice layla
+  how_to_test: TTS/STT swap; also a GCC SIP trunk for phone-only platforms.
+  paths:
+  - plugin
+  stacks:
+  - stt-telnyx
+  - tts-telnyx-layla
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://telnyx.com/release-notes/arabic-speech-models-telnyx-voice-ai
+  - https://telnyx.com/release-notes/arabic-tts-naturalhd
+  - https://telnyx.com/mena
+  - https://pypi.org/project/livekit-plugins-telnyx/
+- id: vapi
+  name: Vapi
+  hq: US
+  group: global
+  types:
+  - voice-agent platform (orchestrator)
+  arabic:
+    gulf_dialects: Depends on chosen providers; users report MSA output even with ar-SA settings
+    code_switching: No automatic AR/EN switch reported in community threads
+  access: Self-serve
+  livekit_plugin: null
+  env_keys:
+  - VAPI_API_KEY
+  test_models:
+  - 'Assistant: Azure ar-SA transcriber + Azure ar-SA-HamedNeural voice'
+  - 'Assistant: Deepgram nova-3 ar + ElevenLabs flash v2.5'
+  how_to_test: 'Phone test: buy/import a number, dial from the caller over LiveKit SIP. Report separately from WebRTC stacks
+    (PSTN adds latency, 8 kHz audio).'
+  paths:
+  - phone
+  stacks:
+  - agent-vapi
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://docs.vapi.ai/llms.txt
+  - https://docs.vapi.ai/providers/transcriber/azure.md
+  - https://support.vapi.ai/t/27085893/arabic-dialects
+  - https://support.vapi.ai/t/33030946/arabic-deepgram-support
+- id: retell-ai
+  name: Retell AI
+  hq: US
+  group: global
+  types:
+  - voice-agent platform
+  arabic:
+    gulf_dialects: Arabic listed as ar-SA; community reports only Saudi accent works
+    code_switching: Multilingual mode
+  access: Self-serve
+  livekit_plugin: null
+  env_keys:
+  - RETELL_API_KEY
+  test_models:
+  - Agent language ar-SA
+  how_to_test: Phone test as for Vapi.
+  paths:
+  - phone
+  stacks:
+  - agent-retell
+  status: ready to test once the keys/number are in .env
+  confidence: medium
+  sources:
+  - https://docs.retellai.com/build/language-support.md
+  - https://community.retellai.com/t/arabic-language-voice-agent-the-client-base-is-mainly-in-the-levant-region-so-i-need-support-for-lebanese-accent/1452
+- id: bland-ai
+  name: Bland AI
+  hq: US
+  group: global
+  types:
+  - voice-agent platform
+  - TTS
+  arabic:
+    gulf_dialects: Unverified
+  access: Self-serve
+  livekit_plugin: livekit-plugins-bland 1.8.11 (TTS)
+  env_keys:
+  - BLAND_API_KEY
+  test_models: []
+  how_to_test: Low priority until Arabic support is confirmed.
+  paths:
+  - phone
+  stacks:
+  - agent-bland
+  status: ready to test once the keys/number are in .env
+  confidence: low
+  sources:
+  - https://bland.ai/
+  - https://docs.bland.ai/llms.txt
+  - https://pypi.org/project/livekit-plugins-bland/
+- id: synthflow
+  name: Synthflow
+  hq: Germany (Berlin)
+  group: global
+  types:
+  - voice-agent platform
+  arabic:
+    gulf_dialects: Unverified
+  access: Self-serve
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: Low priority until Arabic support is confirmed.
+  paths:
+  - phone
+  stacks:
+  - agent-synthflow
+  status: ready to test once the keys/number are in .env
+  confidence: low
+  sources:
+  - https://docs.synthflow.ai/about-supported-languages
+  - https://docs.synthflow.ai/llms.txt
+- id: ultravox
+  name: Ultravox (now part of Inworld)
+  hq: US
+  group: global
+  types:
+  - speech-to-speech
+  - voice-agent platform
+  arabic:
+    gulf_dialects: Unverified
+  access: Self-serve
+  livekit_plugin: livekit-plugins-ultravox (realtime)
+  env_keys:
+  - ULTRAVOX_API_KEY
+  test_models: []
+  how_to_test: Optional realtime swap; a developer reported Arabic numeral/date errors.
+  paths: []
+  stacks: []
+  status: Optional speech-to-speech swap; reported Arabic number/date errors.
+  confidence: low
+  sources:
+  - https://docs.ultravox.ai/llms.txt
+  - https://www.ultravox.ai/blog/ultravox-v0-5-taking-the-lead-in-speech-understanding
+  - https://moadel.pages.dev/posts/making-an-arabic-voice-agent-with-rag-in-under-100ms
+  - https://www.ultravox.ai/blog
+- id: hume-ai
+  name: Hume AI
+  hq: US
+  group: global
+  types:
+  - TTS
+  - speech-to-speech (EVI)
+  arabic: {}
+  access: n/a
+  livekit_plugin: livekit-plugins-hume (TTS)
+  env_keys:
+  - HUME_API_KEY
+  test_models: []
+  how_to_test: 'Do not test: TTS and EVI APIs shut down 13 Nov 2026 (12:01 a.m. EST).'
+  paths: []
+  stacks: []
+  status: 'Hume shuts down its TTS and voice-agent APIs on 2026-11-13: not included.'
+  confidence: high
+  sources:
+  - https://dev.hume.ai/docs/text-to-speech-tts/overview
+  - https://hume.ai/blog/octave-2-launch
+- id: neuralspace
+  name: NeuralSpace
+  hq: UK (London)
+  group: global
+  types:
+  - STT
+  - TTS
+  arabic:
+    gulf_dialects: Earlier dialectal Arabic STT models; Saudi focus (2023-era sources)
+  access: Unknown
+  livekit_plugin: null
+  env_keys: []
+  test_models: []
+  how_to_test: Skip unless current API is confirmed; no 2026 activity found.
+  paths: []
+  stacks: []
+  status: No 2026 activity.
+  confidence: low
+  sources:
+  - https://medium.com/neuralspace/introducing-dialectal-speech-to-text-models-for-arabic-2a6f712e7163
+  - https://www.einpresswire.com/article/674140697/neuralspace-launches-authentic-ai-voices-for-locally-spoken-dialects
+local_models:
+- kind: LLM
+  name: ALLaM 7B Instruct (preview)
+  hf_repo: humain-ai/ALLaM-7B-Instruct-preview
+  licence: Apache-2.0
+  gguf_repo: bartowski/ALLaM-AI_ALLaM-7B-Instruct-preview-GGUF
+  gguf_file: ALLaM-AI_ALLaM-7B-Instruct-preview-Q4_K_M.gguf
+  ollama: ollama pull hf.co/bartowski/ALLaM-AI_ALLaM-7B-Instruct-preview-GGUF:Q4_K_M
+  approx_q4_size_gb: 4.5
+  notes: Saudi (HUMAIN/SDAIA). Fits easily in 24 GB.
+  confidence: high
+- kind: LLM
+  name: Jais 3 7B
+  hf_repo: inception42/Jais-3-7B
+  licence: Apache-2.0
+  gguf_repo: IFM/Jais-3-7B-GGUF
+  gguf_file: Jais-3-7B-Q4_K_M.gguf
+  ollama: ollama pull hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M (needs an Ollama build whose llama.cpp includes K2 Horizon support,
+    PR ggml-org/llama.cpp#29535; otherwise run llama-server -hf IFM/Jais-3-7B-GGUF:Q4_K_M --jinja)
+  approx_q4_size_gb: 4.5
+  notes: Oct 2026, K2HorizonForCausalLM, 512K context, reasoning + tool calls. Also 0.9B, 3.7B, 32B, MoVA-36B-A4B (MoE)
+    and *-Uno variants; MLX builds IFM/Jais-3-*-MLX-4bit.
+  confidence: medium (Ollama compatibility not verified)
+- kind: LLM
+  name: Jais 3 3.7B
+  hf_repo: inception42/Jais-3-3.7B
+  licence: Apache-2.0
+  gguf_repo: IFM/Jais-3-3.7B-GGUF
+  gguf_file: Jais-3-3.7B-Q4_K_M.gguf
+  ollama: ollama pull hf.co/IFM/Jais-3-3.7B-GGUF:Q4_K_M (same llama.cpp caveat)
+  approx_q4_size_gb: 2.4
+  notes: Low-latency option.
+  confidence: medium
+- kind: LLM
+  name: Jais 3 MoVA 36B-A4B
+  hf_repo: inception42/Jais-3-MoVA-36B-A4B
+  licence: Apache-2.0
+  gguf_repo: IFM/Jais-3-MoVA-36B-A4B-GGUF
+  gguf_file: Jais-3-MoVA-36B-A4B-Q4_K_M.gguf
+  ollama: ollama pull hf.co/IFM/Jais-3-MoVA-36B-A4B-GGUF:Q4_K_M (same caveat)
+  approx_q4_size_gb: 21
+  notes: MoE with ~4B active params; Q4 is ~20+ GB, tight on a 24 GB Mac - prefer MLX 4-bit or skip.
+  confidence: medium
+- kind: LLM
+  name: Jais 2 8B Chat
+  hf_repo: inception42/Jais-2-8B-Chat
+  licence: 'Apache-2.0 (gated: accept terms on HF)'
+  gguf_repo: inception42/Jais-2-8B-Chat-GGUF
+  gguf_file: Q4_K_M.gguf
+  ollama: 'ollama pull hf.co/inception42/Jais-2-8B-Chat-GGUF:Q4_K_M (gated repo: needs HF auth)'
+  approx_q4_size_gb: 5
+  notes: Dec 2025. Official GGUF.
+  confidence: high
+- kind: LLM
+  name: Fanar 1 9B Instruct
+  hf_repo: QCRI/Fanar-1-9B-Instruct
+  licence: Apache-2.0
+  gguf_repo: mradermacher/Fanar-1-9B-Instruct-GGUF
+  gguf_file: Fanar-1-9B-Instruct.Q4_K_M.gguf
+  ollama: ollama pull hf.co/mradermacher/Fanar-1-9B-Instruct-GGUF:Q4_K_M
+  approx_q4_size_gb: 5.5
+  notes: Qatar (QCRI). Community GGUF.
+  confidence: high
+- kind: LLM
+  name: Fanar 2 27B Instruct
+  hf_repo: QCRI/Fanar-2-27B-Instruct
+  licence: Apache-2.0 per HF tag (Gemma-3-27B base - check Gemma terms)
+  gguf_repo: mradermacher/Fanar-2-27B-Instruct-i1-GGUF
+  gguf_file: Fanar-2-27B-Instruct.i1-Q4_K_M.gguf
+  ollama: ollama pull hf.co/mradermacher/Fanar-2-27B-Instruct-i1-GGUF:i1-Q4_K_M
+  approx_q4_size_gb: 16.5
+  notes: 'Mar 2026. ~16.5 GB at Q4: workable on 24 GB but slow for live turns.'
+  confidence: medium
+- kind: LLM
+  name: Falcon-H1 7B Instruct (multilingual incl. Arabic)
+  hf_repo: tiiuae/Falcon-H1-7B-Instruct
+  licence: Falcon LLM licence (HF tag 'other')
+  gguf_repo: tiiuae/Falcon-H1-7B-Instruct-GGUF
+  gguf_file: Falcon-H1-7B-Instruct-Q4_K_M.gguf
+  ollama: ollama pull hf.co/tiiuae/Falcon-H1-7B-Instruct-GGUF:Q4_K_M
+  approx_q4_size_gb: 4.6
+  notes: Falcon-H1-Arabic (3B/7B/34B, Jan 2026) did not resolve as public HF repos when checked; falcon3:7b already in local
+    Ollama is not Arabic-specialised.
+  confidence: medium
+- kind: LLM
+  name: SILMA 9B Instruct v1.0
+  hf_repo: silma-ai/SILMA-9B-Instruct-v1.0
+  licence: Gemma
+  gguf_repo: bartowski/SILMA-9B-Instruct-v1.0-GGUF
+  gguf_file: SILMA-9B-Instruct-v1.0-Q4_K_M.gguf
+  ollama: ollama pull hf.co/bartowski/SILMA-9B-Instruct-v1.0-GGUF:Q4_K_M
+  approx_q4_size_gb: 5.8
+  notes: Saudi-built (SILMA AI); 2024, older.
+  confidence: high
+- kind: LLM
+  name: Command R7B Arabic
+  hf_repo: CohereLabs/c4ai-command-r7b-arabic-02-2025
+  licence: CC-BY-NC-4.0 (non-commercial)
+  gguf_repo: matrixportalx/c4ai-command-r7b-arabic-02-2025-GGUF
+  gguf_file: (check repo for Q4_K_M)
+  ollama: ollama pull hf.co/matrixportalx/c4ai-command-r7b-arabic-02-2025-GGUF:Q4_K_M
+  approx_q4_size_gb: 5
+  notes: Benchmark-only (non-commercial).
+  confidence: medium
+- kind: STT
+  name: Jais-ASR
+  hf_repo: IFM/Jais-ASR
+  licence: Apache-2.0
+  gguf_repo: IFM/Jais-ASR-GGUF
+  gguf_file: Jais-ASR-Q4_K_M.gguf
+  ollama: null
+  mac_runtime: 'MLX: IFM/Jais-ASR-MLX-4bit / -MLX-8bit via a patched mlx-vlm (patch shipped in the repo); or transformers
+    on MPS; vLLM plugin gives an OpenAI /v1/audio/transcriptions server (GPU)'
+  notes: Oct 2026. MSA + 19 dialects (SA, AE, QA, KW, BH, OM ...), code-switch EN/FR/ES/IT, dialect ID, optional diacritics.
+    Self-reported 22.85% WER / 8.37% CER on the Open Universal Arabic ASR Leaderboard. bf16 is 11.4 GB.
+  confidence: high
+- kind: STT
+  name: Cohere Transcribe Arabic
+  hf_repo: CohereLabs/cohere-transcribe-arabic-07-2026
+  licence: 'Apache-2.0 (gated: accept terms)'
+  gguf_repo: handy-computer/cohere-transcribe-arabic-07-2026-gguf
+  gguf_file: cohere-transcribe-arabic-07-2026-Q4_K_M.gguf
+  ollama: null
+  notes: Jul 2026, 2B, Arabic+English code-switching; no timestamps/diarization; 25.87 WER on the leaderboard (reported).
+  confidence: high
+- kind: STT
+  name: NAMAA Saudi ASR V1 (LoRA)
+  hf_repo: NAMAA-Space/NAMAA-Saudi-ASR-V1
+  licence: Apache-2.0
+  gguf_repo: null
+  ollama: null
+  notes: 90 MB LoRA on Cohere Transcribe Arabic, ~30 h Saudi podcasts, 26.5% WER on its Saudi set.
+  confidence: medium
+- kind: STT
+  name: Audar ASR V1 Turbo / Flash
+  hf_repo: audarai/Audar-ASR-V1-Turbo
+  licence: other (read before use)
+  gguf_repo: audarai/Audar-ASR-V1-Turbo (GGUF files in repo)
+  gguf_file: Audar-ASR-V1-Turbo-Q4_K_M.gguf
+  ollama: null
+  notes: Gulf/Emirati in training data (secondary); Flash = edge tier.
+  confidence: medium
+- kind: STT
+  name: Whisper small Gulf fine-tunes
+  hf_repo: otozz/whisper-small-dialect_gulf
+  licence: unknown
+  gguf_repo: null
+  ollama: null
+  notes: Low-download research checkpoints; Jais-ASR / Cohere Transcribe Arabic are better baselines.
+  confidence: low
+- kind: TTS
+  name: NAMAA Saudi TTS
+  hf_repo: NAMAA-Space/NAMAA-Saudi-TTS
+  licence: MIT
+  gguf_repo: null
+  ollama: null
+  notes: Chatterbox fine-tune, Saudi (Najdi) conversational voice; commercial-friendly.
+  confidence: high
+- kind: TTS
+  name: NAMAA Saudi TTS V2
+  hf_repo: NAMAA-Space/NAMAA-Saudi-TTS-V2
+  licence: CC-BY-NC-SA-4.0
+  gguf_repo: null
+  ollama: null
+  notes: Habibi-TTS based; non-commercial.
+  confidence: high
+- kind: TTS
+  name: Habibi TTS (unified dialectal)
+  hf_repo: SWivid/Habibi-TTS
+  licence: CC-BY-NC-SA-4.0
+  gguf_repo: null
+  ollama: null
+  notes: pip habibi-tts; arXiv 2601.13802; non-commercial.
+  confidence: high
+- kind: TTS
+  name: SILMA TTS
+  hf_repo: silma-ai/silma-tts
+  licence: Apache-2.0
+  gguf_repo: null
+  ollama: null
+  notes: Arabic/English, lightweight.
+  confidence: high
+- kind: TTS
+  name: Lahgtna OmniVoice v2
+  hf_repo: oddadmix/lahgtna-omnivoice-v2
+  licence: not tagged
+  gguf_repo: cstr/lahgtna-chatterbox-v1-GGUF (Chatterbox variant)
+  ollama: null
+  notes: Egyptian/Saudi/Moroccan/Iraqi dialects.
+  confidence: medium
+- kind: TTS
+  name: Audar TTS V1 Turbo / Flash
+  hf_repo: audarai/Audar-TTS-V1-Turbo
+  licence: other
+  gguf_repo: audarai/Audar-TTS-V1-Turbo (GGUF files in repo)
+  ollama: null
+  notes: ''
+  confidence: medium
+notes:
+- Snapshot taken 2026-11-10. Vendor accuracy claims (Munsit, Nabrah, Unifonic, Maqsam, Intella, Jais-ASR, Cohere, TII) are
+  self-reported; our benchmark is the independent check.
+- 'Only providers with self-serve API access and streaming STT/TTS can be tested reproducibly inside the LiveKit harness:
+  HUMAIN Voice (if self-serve holds), Munsit, Nabrah, Sarj, Hamsa, Fanar (quota-limited), CAMB.AI, plus all global vendors.
+  Maqsam, Unifonic, Dayl, Hams.AI, ZIWO, Arabic.AI, Wittify, Sawt are sales/pilot-only phone agents.'
+- 'Phone-only platforms (Maqsam, Vapi, Retell, Nabrah/Hamsa agents, Sarj outbound) need a LiveKit SIP trunk (Twilio is already
+  in .env). Report them in a separate ''phone'' bracket: PSTN adds latency and narrows audio to 8 kHz, so mixing them with
+  WebRTC stacks on one latency chart would be unfair.'
+- Project memory says LiveKit Inference credits are exhausted; prefer direct plugins with vendor keys (livekit-plugins-*)
+  over Inference model strings for new stacks.
+- 'Official/3rd-party LiveKit plugins relevant to Arabic: openai, google, azure, microsoft-ai, aws, deepgram, speechmatics,
+  soniox, gladia, assemblyai, cartesia, elevenlabs, xai, mistralai, cambai, telnyx, ultravox, bland, nabrah (official, STT),
+  munsit (CNTXT, STT+TTS), faseeh (legacy). No plugin: HUMAIN Voice, Sarj, Hamsa, Fanar, Lahajati, Cohere -> write stacks/custom
+  factories (Sarj and Fanar can reuse livekit-plugins-openai with base_url).'
+- 'Do not confuse: Pipecat''s ''inception'' service is Inception Labs (US, Mercury diffusion LLM), not G42/Inception42 Jais.
+  Hamsa (tryhamsa.com) is not Hams.AI (Riyadh). Telnyx ''Bayan'' TTS is unrelated to HUMAIN''s ''Bayan'' ASR as far as I
+  can tell.'
+- 'Dropped or demoted after checking: Mozn (Saudi; NLU ''OSOS'' and AML ''FOCAL'', no voice product found), Presight (UAE;
+  analytics, no voice product found), Core42 (Jais Chat app; no voice API found), Hume (APIs sunset 13 Nov 2026), NeuralSpace
+  (no 2026 activity found), Falcon-ASR (announced Oct 2026, no weights or API yet).'
+- 'Seen but not verified enough to include: Kalimna AI, DOO (Bahrain), Zain Bahrain OneCX (Bahraini-dialect voice agent),
+  KuwaitAI, AethexAI ($3M), Lucidya agent, Kanari AI, Fenek AI, Nevox AI, Clearvision (KSA), Edesy. Aggregator sites arabicagenticai.pages.dev
+  and ai-in-arabia-v2.pages.dev look auto-generated; their claims were not used as facts.'
+- 'Useful public yardsticks for the video: Open Universal Arabic ASR Leaderboard (Elm) https://github.com/Natural-Language-Processing-Elm/open_universal_arabic_asr_leaderboard
+  ; SawtArabi TTS benchmark (HUMAIN/SDAIA, Interspeech 2025) https://www.middleeastainews.com/p/humain-sawtarabi-arabic-tts-benchmark
+  ; Nabrah cites the SADA benchmark.'
+- 'Regional hosting matters for latency: AWS me-central-1 (UAE) and a Saudi region slated for Dec 2026; Munsit has a UAE
+  server (ae.api.faseeh.ai); HUMAIN and Nabrah host in KSA. The harness routes LiveKit to the UAE gateway, so local vendors
+  may look faster partly for geographic reasons; note this on screen.'
+- 'This Mac: Apple M4 Pro, 24 GB RAM, Ollama 0.40.15 installed (falcon3:7b, qwen3:8b, qwen3:14b present). 7-9B Q4 Arabic
+  LLMs are comfortable; 27B+ Q4 are tight.'
+- 'Licences: CC-BY-NC models (Command R7B Arabic, Habibi, NAMAA-Saudi-TTS-V2) are fine for a benchmark but not for the resellable
+  avatar product.'

@@ -1,0 +1,12 @@
+# Telnyx STT (carrier with GCC numbers). Key: TELNYX_API_KEY.
+# STT swap of ref-pipeline.
+name: Telnyx STT ar · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Telnyx STT
+display_sub: Telnyx STT ar · ref LLM + TTS
+provider: telnyx + openai + elevenlabs
+kind: pipeline
+stt: {plugin: telnyx, language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

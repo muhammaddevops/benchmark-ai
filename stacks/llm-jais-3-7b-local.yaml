@@ -1,0 +1,15 @@
+# Jais 3 7B (UAE, MBZUAI IFM) via Ollama with the reference speech (ElevenLabs). Pull once: ollama pull hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M
+name: Scribe v2 RT · Jais 3 7B (local) · ElevenLabs Flash v2.5
+display: Jais 3 7B · UAE
+display_sub: local LLM · ref STT + TTS
+provider: elevenlabs + local (jais-3-7b)
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: ollama, model: 'hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M', max_tokens: 220}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'LLM test: only the LLM differs from ref-pipeline.'

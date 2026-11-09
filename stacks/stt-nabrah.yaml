@@ -1,0 +1,13 @@
+# Nabrah (Riyadh): Saudi/Gulf streaming STT with built-in end-of-turn. Key: NABRAH_API_KEY (keys start nb_).
+# Plugin: livekit-plugins-nabrah (official LiveKit).
+# STT swap of ref-pipeline.
+name: Nabrah eot_nabrah ar-SA · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Nabrah STT (Saudi)
+display_sub: Nabrah eot_nabrah ar-SA · ref LLM + TTS
+provider: nabrah + openai + elevenlabs
+kind: pipeline
+stt: {plugin: nabrah, language: ar-SA}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

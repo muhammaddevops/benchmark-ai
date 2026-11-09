@@ -1,0 +1,9 @@
+name: Gemini 3.5 Transcribe Live · Gemini 3 Flash · ElevenLabs Flash v2.5
+display: Gemini + ElevenLabs
+display_sub: "Gemini Transcribe · Gemini 3 Flash · Flash v2.5"
+provider: google + elevenlabs
+kind: pipeline
+stt: {model: google/gemini-3.5-transcribe-live}
+llm: {model: google/gemini-3-flash}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector

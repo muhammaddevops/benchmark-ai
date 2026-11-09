@@ -1,0 +1,7 @@
+name: Google Gemini Live (speech-to-speech)
+display: Google Gemini Live
+display_sub: "speech-to-speech"
+provider: google
+kind: realtime
+realtime: {model: google/gemini-live}
+notes: Realtime model via LiveKit Inference.

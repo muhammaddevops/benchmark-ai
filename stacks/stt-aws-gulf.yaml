@@ -1,0 +1,12 @@
+# AWS Transcribe streaming, ar-AE (Gulf Arabic). Keys: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (+ AWS_DEFAULT_REGION).
+# STT swap of ref-pipeline.
+name: Transcribe ar-AE · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: AWS Transcribe
+display_sub: Transcribe ar-AE · ref LLM + TTS
+provider: aws + openai + elevenlabs
+kind: pipeline
+stt: {plugin: aws, language: ar-AE}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

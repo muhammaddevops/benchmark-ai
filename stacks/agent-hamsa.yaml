@@ -1,0 +1,10 @@
+# Hamsa voice agent, tested as a black box over the phone (domestic). How to get a number: self-serve agents with phone numbers.
+# Set it up with `bench brief <scenario>`, put its number in .env as HAMSA_AGENT_NUMBER, needs BENCH_SIP_TRUNK_ID once.
+name: Hamsa voice agent (phone)
+display: Hamsa
+display_sub: hosted agent · via phone
+provider: hamsa
+kind: phone
+phone: {number_env: HAMSA_AGENT_NUMBER, trunk_env: BENCH_SIP_TRUNK_ID}
+notes: Black box over the phone network (adds ~0.3-0.6 s and narrowband audio). Record the platform's voice, model and language
+  settings here before publishing.

@@ -1,0 +1,17 @@
+# Google Cloud Speech-to-Text Chirp 3. Needs GOOGLE_APPLICATION_CREDENTIALS (service account JSON).
+# STT swap of ref-pipeline.
+name: Chirp 3 ar-SA + en-US · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Google STT
+display_sub: Chirp 3 ar-SA + en-US · ref LLM + TTS
+provider: google + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: google
+  model: chirp_3
+  language: [ar-SA, en-US]
+  kwargs: {location: us}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Chirp 3 in the us multi-region.'
+requires: [GOOGLE_APPLICATION_CREDENTIALS]

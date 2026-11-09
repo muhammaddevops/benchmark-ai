@@ -1,0 +1,20 @@
+# AWS Polly neural, Gulf voice Zayd (ar-AE). Keys: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · Polly Zayd ar-AE
+display: AWS Polly
+display_sub: Polly Zayd ar-AE · ref STT + LLM
+provider: elevenlabs + openai + aws
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: aws
+  voice: Zayd
+  language: ar-AE
+  kwargs: {speech_engine: neural}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

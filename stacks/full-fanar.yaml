@@ -1,0 +1,18 @@
+# Fanar (Qatar Computing Research Institute, HBKU): Arabic-first STT + LLM + TTS behind one OpenAI-style API.
+# Key: request access at https://api.fanar.qa/request, then FANAR_API_KEY in .env. Model and voice ids from
+# Fanar's OpenAPI spec (2026-11): STT Fanar-Aura-STT-1 | Fanar-3.0-Aura-Transcribe, TTS Fanar-Aura-TTS-2
+# voices Hamad, Jasim, Abdulrahman, Noor, Huda, Radwa (Arabic) and Amelia, Emily, Harry, Jake (English).
+name: Fanar Aura STT · Fanar LLM · Fanar Aura TTS-2
+display: Fanar (Qatar)
+display_sub: "Aura STT · Fanar · Aura TTS-2 (Hamad)"
+provider: fanar
+kind: pipeline
+stt: {plugin: openai, base_url: "https://api.fanar.qa/v1", api_key_env: FANAR_API_KEY, model: Fanar-Aura-STT-1,
+      kwargs: {detect_language: true}}
+llm: {plugin: openai-compatible, base_url: "https://api.fanar.qa/v1", api_key_env: FANAR_API_KEY, model: Fanar}
+tts: {plugin: openai, base_url: "https://api.fanar.qa/v1", api_key_env: FANAR_API_KEY, model: Fanar-Aura-TTS-2,
+      voice: Hamad, kwargs: {response_format: wav}}
+turn_detection: turn-detector
+notes: >-
+  Batch STT after end of speech (LiveKit VAD), so STT adds a round trip per turn. Untested until a key is added:
+  smoke-build, then run one call and check results/worker.log for 4xx from Fanar's API.

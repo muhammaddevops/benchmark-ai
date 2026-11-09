@@ -1,0 +1,8 @@
+# OpenAI gpt-realtime-2.1 speech-to-speech, direct (bring your own OPENAI_API_KEY).
+name: OpenAI gpt-realtime-2.1 (speech-to-speech)
+display: OpenAI Realtime
+display_sub: gpt-realtime-2.1 · speech-to-speech
+provider: openai
+kind: realtime
+realtime: {plugin: openai, model: gpt-realtime-2.1, voice: marin}
+notes: Server-side turn detection (vendor default).

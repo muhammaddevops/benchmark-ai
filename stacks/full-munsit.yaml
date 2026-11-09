@@ -1,0 +1,11 @@
+# Munsit/Faseeh speech in and out (UAE) with the reference LLM. Key: MUNSIT_API_KEY.
+name: Munsit STT · GPT-5.4 mini · Faseeh Najdi
+display: Munsit (UAE)
+display_sub: Munsit STT · GPT-5.4 mini · Faseeh Najdi
+provider: munsit + openai
+kind: pipeline
+stt: {plugin: munsit, model: munsit-en-ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: munsit, model: faseeh-v1-preview, voice: ar-najdi-male-2}
+turn_detection: turn-detector
+notes: 'Vendor speech stack: STT and TTS from the vendor, the reference LLM (GPT-5.4 mini) as the brain.'

@@ -1,0 +1,7 @@
+name: OpenAI gpt-realtime-2.1 (speech-to-speech)
+display: OpenAI Realtime
+display_sub: "gpt-realtime-2.1 · speech-to-speech"
+provider: openai
+kind: realtime
+realtime: {model: openai/gpt-realtime-2.1, voice: marin}
+notes: Realtime model via LiveKit Inference; server-side turn detection.

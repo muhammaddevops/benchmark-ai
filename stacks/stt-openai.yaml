@@ -1,0 +1,15 @@
+# OpenAI gpt-4o-transcribe (batch after end of speech). Key: OPENAI_API_KEY.
+# STT swap of ref-pipeline.
+name: gpt-4o-transcribe · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: OpenAI STT
+display_sub: gpt-4o-transcribe · ref LLM + TTS
+provider: openai + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: openai
+  model: gpt-4o-transcribe
+  kwargs: {detect_language: true}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. Batch transcription per turn (VAD), not streaming.'

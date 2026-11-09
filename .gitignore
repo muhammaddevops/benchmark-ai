@@ -1,0 +1,11 @@
+# secrets
+.env
+.env.*
+!.env.example
+# environments
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+# outputs: call recordings, videos and charts stay local (large; recordings contain voices)
+results/

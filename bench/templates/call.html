@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1220; --panel: #121b2e; --panel-2: #17223a; --line: #23314d;
+    --text: #eef2f7; --muted: #93a1b8; --dim: #5d6b84;
+    --caller: #e3b65b; --agent: #2fc6b6;
+    --good: #34d399; --ok: #fbbf24; --slow: #f87171;
+    --font: "Inter", "SF Pro Display", -apple-system, system-ui, sans-serif;
+    --arabic: "IBM Plex Sans Arabic", "SF Arabic", "Geeza Pro", sans-serif;
+    --u: 1px;            /* layout unit, scaled per format */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font), var(--arabic); overflow: hidden; }
+  .frame { position: absolute; inset: 0; display: grid; padding: calc(56 * var(--u)) calc(72 * var(--u)); gap: calc(28 * var(--u));
+    grid-template-rows: auto 1fr auto; background: radial-gradient(1200px 700px at 50% -10%, #16223b 0%, var(--bg) 60%); }
+  .ar, [lang="ar"] { font-family: var(--arabic); }
+
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: calc(24 * var(--u)); }
+  .kicker { font-size: calc(19 * var(--u)); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .kicker b { color: var(--agent); }
+  h1 { font-size: calc(54 * var(--u)); font-weight: 800; line-height: 1.08; margin-top: calc(8 * var(--u)); letter-spacing: -.01em; }
+  .chips { display: flex; flex-wrap: wrap; gap: calc(10 * var(--u)); justify-content: flex-end; }
+  .chip { font-size: calc(18 * var(--u)); font-weight: 600; color: var(--muted); border: calc(1.5 * var(--u)) solid var(--line);
+    border-radius: 999px; padding: calc(7 * var(--u)) calc(16 * var(--u)); white-space: nowrap; background: rgba(255,255,255,.02); }
+
+  .stage { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: calc(28 * var(--u)); min-height: 0; }
+  .party { position: relative; background: var(--panel); border: calc(1.5 * var(--u)) solid var(--line); border-radius: calc(26 * var(--u));
+    padding: calc(30 * var(--u)); display: grid; grid-template-rows: auto auto 1fr auto; gap: calc(18 * var(--u)); min-height: 0;
+    transition: border-color .2s, box-shadow .2s; }
+  .party.on.caller { border-color: var(--caller); box-shadow: 0 0 0 calc(4 * var(--u)) rgba(227,182,91,.12); }
+  .party.on.agent { border-color: var(--agent); box-shadow: 0 0 0 calc(4 * var(--u)) rgba(47,198,182,.12); }
+  .who { display: flex; align-items: center; gap: calc(16 * var(--u)); }
+  .avatar { width: calc(64 * var(--u)); height: calc(64 * var(--u)); border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; font-size: calc(26 * var(--u)); color: var(--bg); flex: none; }
+  .caller .avatar { background: var(--caller); } .agent .avatar { background: var(--agent); }
+  .who b { display: block; font-size: calc(28 * var(--u)); font-weight: 700; }
+  .who small { display: block; font-size: calc(18 * var(--u)); color: var(--muted); margin-top: calc(2 * var(--u)); }
+  .state { margin-left: auto; font-size: calc(17 * var(--u)); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .on .state { color: var(--text); }
+  canvas.wave { width: 100%; height: calc(96 * var(--u)); display: block; }
+  .caption { font-size: calc(38 * var(--u)); line-height: 1.45; font-weight: 500; color: var(--text); overflow: hidden;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; unicode-bidi: plaintext; text-align: start; }
+  .caption.ar { font-size: calc(42 * var(--u)); line-height: 1.6; }
+  .caption.old { color: var(--dim); }
+  .tags { display: flex; gap: calc(10 * var(--u)); align-items: center; min-height: calc(40 * var(--u)); }
+  .tag { font-size: calc(17 * var(--u)); font-weight: 700; border-radius: calc(8 * var(--u)); padding: calc(6 * var(--u)) calc(12 * var(--u));
+    background: var(--panel-2); color: var(--muted); letter-spacing: .02em; }
+  .tag.okv { color: var(--good); background: rgba(52,211,153,.12); }
+  .tag.bad { color: var(--slow); background: rgba(248,113,113,.12); }
+
+  /* response-time stopwatch, between the panels */
+  .clock { position: absolute; left: 50%; top: calc(120 * var(--u)); transform: translate(-50%, 0); z-index: 5; text-align: center;
+    background: var(--bg); border: calc(2 * var(--u)) solid var(--line); border-radius: calc(22 * var(--u));
+    padding: calc(14 * var(--u)) calc(22 * var(--u)); min-width: calc(210 * var(--u)); opacity: 0; transition: opacity .15s; }
+  .clock.show { opacity: 1; }
+  .clock .lbl { font-size: calc(15 * var(--u)); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .clock .val { font-size: calc(52 * var(--u)); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: calc(4 * var(--u)); }
+  .clock.good { border-color: var(--good); } .clock.good .val { color: var(--good); }
+  .clock.ok { border-color: var(--ok); } .clock.ok .val { color: var(--ok); }
+  .clock.slow { border-color: var(--slow); } .clock.slow .val { color: var(--slow); }
+  .clock.run .val { color: var(--text); }
+
+  footer { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: calc(28 * var(--u)); }
+  .timeline { position: relative; height: calc(10 * var(--u)); background: var(--panel-2); border-radius: 99px; overflow: visible; }
+  .timeline .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--agent), #7fe0d6); border-radius: 99px; }
+  .timeline .mk { position: absolute; top: calc(-5 * var(--u)); width: calc(4 * var(--u)); height: calc(20 * var(--u)); border-radius: 2px; background: var(--dim); }
+  .stats { font-size: calc(20 * var(--u)); color: var(--muted); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .stats b { color: var(--text); }
+
+  /* closing results card */
+  .end { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(11,18,32,.96); opacity: 0; }
+  .end-in { width: min(calc(1200 * var(--u)), 88%); text-align: center; }
+  .end .kicker { margin-bottom: calc(12 * var(--u)); }
+  .end h2 { font-size: calc(48 * var(--u)); font-weight: 800; }
+  .end .score { font-size: calc(150 * var(--u)); font-weight: 800; line-height: 1; margin: calc(18 * var(--u)) 0 calc(4 * var(--u)); color: var(--agent); font-variant-numeric: tabular-nums; }
+  .end .score small { font-size: calc(44 * var(--u)); color: var(--muted); font-weight: 700; }
+  .end .sl { font-size: calc(20 * var(--u)); color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(18 * var(--u)); margin-top: calc(40 * var(--u)); }
+  .cell { background: var(--panel); border: calc(1.5 * var(--u)) solid var(--line); border-radius: calc(20 * var(--u)); padding: calc(22 * var(--u)) calc(16 * var(--u)); }
+  .cell .v { font-size: calc(46 * var(--u)); font-weight: 800; font-variant-numeric: tabular-nums; }
+  .cell .k { font-size: calc(17 * var(--u)); color: var(--muted); font-weight: 600; margin-top: calc(6 * var(--u)); }
+  .end .note { margin-top: calc(28 * var(--u)); font-size: calc(17 * var(--u)); color: var(--dim); }
+
+  /* square and vertical posts */
+  body.square .frame { padding: calc(48 * var(--u)) calc(52 * var(--u)); }
+  body.square header { flex-direction: column; align-items: flex-start; }
+  body.square .chips { justify-content: flex-start; }
+  body.square .stage, body.vertical .stage { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  body.square .clock, body.vertical .clock { top: 50%; left: auto; right: calc(40 * var(--u)); transform: translate(0, -50%); }
+  body.square .caption { -webkit-line-clamp: 3; }
+  body.vertical .frame { padding: calc(80 * var(--u)) calc(56 * var(--u)) calc(110 * var(--u)); }
+  body.vertical header { flex-direction: column; align-items: flex-start; }
+  body.vertical .chips { justify-content: flex-start; }
+  body.vertical footer { grid-template-columns: 1fr; }
+  body.square .grid, body.vertical .grid { grid-template-columns: repeat(2, 1fr); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div>
+      <div class="kicker" id="kicker"><b>Gulf Voice AI Benchmark</b> · live mock call</div>
+      <h1 id="provider">Provider</h1>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+  <main class="stage" id="stage">
+    <section class="party caller" id="pCaller">
+      <div class="who"><div class="avatar">C</div><div><b>Caller</b><small id="callerSub">Simulated Saudi customer</small></div><span class="state" id="sCaller">Listening</span></div>
+      <canvas class="wave" id="wCaller"></canvas>
+      <div class="caption" id="cCaller"></div>
+      <div class="tags" id="tCaller"></div>
+    </section>
+    <section class="party agent" id="pAgent">
+      <div class="who"><div class="avatar" id="agentInitial">A</div><div><b id="agentName">Voice agent</b><small id="agentSub">System under test</small></div><span class="state" id="sAgent">Listening</span></div>
+      <canvas class="wave" id="wAgent"></canvas>
+      <div class="caption" id="cAgent"></div>
+      <div class="tags" id="tAgent"></div>
+    </section>
+    <div class="clock" id="clock"><div class="lbl">Response time</div><div class="val" id="clockVal">0.0 s</div></div>
+  </main>
+  <footer>
+    <div class="timeline" id="timeline"><div class="fill" id="fill"></div></div>
+    <div class="stats" id="stats"></div>
+  </footer>
+  <div class="end" id="end"><div class="end-in">
+    <div class="kicker"><b>Gulf Voice AI Benchmark</b> · result</div>
+    <h2 id="endName">Provider</h2>
+    <div class="score" id="endScore">0<small>/100</small></div>
+    <div class="sl">Caller experience score</div>
+    <div class="grid" id="endGrid"></div>
+    <div class="note" id="endNote"></div>
+  </div></div>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const LANG = { en: 'English', 'ar-gulf': 'Gulf Arabic', 'ar-msa': 'MSA Arabic', mixed: 'Arabic + English', ar: 'Arabic' };
+  const isArabic = (s) => /[؀-ۿ]/.test(s || '') && ((s.match(/[؀-ۿ]/g) || []).length > (s.match(/[A-Za-z]/g) || []).length * 0.6);
+  let D = null;
+
+  function fmtS(ms) { return (ms / 1000).toFixed(ms < 10000 ? 2 : 1) + ' s'; }
+  function band(ms) { return ms < 1000 ? 'good' : ms < 2000 ? 'ok' : 'slow'; }
+
+  // reveal a caption word by word over its speaking time
+  function reveal(text, p) {
+    if (p >= 1) return text;
+    const words = text.split(/(\s+)/);
+    const n = Math.ceil(words.length * Math.max(0, p));
+    return words.slice(0, n).join('');
+  }
+
+  function drawWave(canvas, env, t, color, active) {
+    const dpr = 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== w * dpr) { canvas.width = w * dpr; canvas.height = h * dpr; }
+    const g = canvas.getContext('2d');
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    const fps = D.env_fps, bars = 64, span = 3.2;           // last 3.2 s, newest on the right
+    const bw = canvas.width / bars;
+    for (let i = 0; i < bars; i++) {
+      const tt = t - span + (i + 1) * (span / bars);
+      const k = Math.floor(tt * fps);
+      const v = k >= 0 && k < env.length ? env[k] : 0;
+      const bh = Math.max(canvas.height * 0.04, v * canvas.height * 0.95);
+      g.globalAlpha = active ? (0.35 + 0.65 * (i / bars)) : 0.22;
+      g.fillStyle = color;
+      const x = i * bw + bw * 0.2, y = (canvas.height - bh) / 2;
+      const r = Math.min(bw * 0.3, bh / 2);
+      g.beginPath();
+      g.roundRect ? g.roundRect(x, y, bw * 0.6, bh, r) : g.rect(x, y, bw * 0.6, bh);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+  }
+
+  function lastBefore(list, t) { let r = null; for (const e of list) { if (e.start <= t) r = e; } return r; }
+
+  function setCaption(el, ev, t) {
+    if (!ev) { el.textContent = ''; return; }
+    const p = ev.end > ev.start ? (t - ev.start) / (ev.end - ev.start) : 1;
+    el.textContent = reveal(ev.text, p);
+    el.classList.toggle('ar', isArabic(ev.text));
+    el.classList.toggle('old', t > ev.end + 0.4);
+  }
+
+  function tags(el, items) {
+    el.innerHTML = '';
+    for (const [txt, cls] of items) { const s = document.createElement('span'); s.className = 'tag ' + (cls || ''); s.textContent = txt; el.appendChild(s); }
+  }
+
+  window.setup = function (data, format) {
+    D = data;
+    document.body.className = format;
+    // one layout unit: 1px on a 1920-wide landscape frame; bigger relative units on square and vertical posts
+    const base = { landscape: 1920, square: 1080 / 0.78, vertical: 1080 / 1.0 }[format] || 1920;
+    document.documentElement.style.setProperty('--u', (window.innerWidth / base) + 'px');
+    $('provider').textContent = D.provider;
+    $('agentName').textContent = D.agent_label || D.provider;
+    $('agentInitial').textContent = (D.provider || 'A').trim()[0].toUpperCase();
+    $('agentSub').textContent = D.agent_sub || 'System under test';
+    $('callerSub').textContent = D.caller_sub || 'Simulated Saudi customer';
+    $('kicker').innerHTML = '<b>' + (D.brand || 'Gulf Voice AI Benchmark') + '</b> · ' + (D.kicker || 'live mock call');
+    const chips = $('chips'); chips.innerHTML = '';
+    for (const c of D.chips || []) { const s = document.createElement('span'); s.className = 'chip'; s.textContent = c; chips.appendChild(s); }
+    const tl = $('timeline');
+    tl.querySelectorAll('.mk').forEach((m) => m.remove());
+    for (const turn of D.caller) { const m = document.createElement('span'); m.className = 'mk'; m.style.left = (100 * turn.start / D.end) + '%'; tl.appendChild(m); }
+    // closing card
+    $('endName').textContent = D.provider;
+    $('endScore').innerHTML = (D.result.score ?? '–') + '<small>/100</small>';
+    const grid = $('endGrid'); grid.innerHTML = '';
+    for (const [v, k] of D.result.cells) { const c = document.createElement('div'); c.className = 'cell'; c.innerHTML = '<div class="v"></div><div class="k"></div>'; c.firstChild.textContent = v; c.lastChild.textContent = k; grid.appendChild(c); }
+    $('endNote').textContent = D.result.note || '';
+    return document.fonts.ready.then(() => true);
+  };
+
+  window.render = function (t, endP) {
+    const cev = lastBefore(D.caller, t), aev = lastBefore(D.agent, t);
+    const callerOn = cev && t >= cev.start && t <= cev.end;
+    const agentOn = aev && t >= aev.start && t <= aev.end;
+    $('pCaller').classList.toggle('on', !!callerOn);
+    $('pAgent').classList.toggle('on', !!agentOn);
+    $('sCaller').textContent = callerOn ? 'Speaking' : 'Listening';
+    $('sAgent').textContent = agentOn ? 'Speaking' : (D.gaps.some((g) => t >= g.start && t < g.end) ? 'Thinking' : 'Listening');
+    // show the most recent utterance of each side; the older side fades
+    setCaption($('cCaller'), cev, t);
+    setCaption($('cAgent'), aev, t);
+    if (cev) tags($('tCaller'), [[LANG[cev.lang] || cev.lang, '']]); else tags($('tCaller'), []);
+    if (aev && aev.lang_ok !== undefined && t > aev.start + 0.6) {
+      tags($('tAgent'), [[aev.reply_lang_label, aev.lang_ok === null ? '' : (aev.lang_ok ? 'okv' : 'bad')], ...(aev.lang_ok === false ? [['wrong language', 'bad']] : [])]);
+    } else tags($('tAgent'), []);
+    drawWave($('wCaller'), D.env_caller, t, getComputedStyle(document.body).getPropertyValue('--caller'), callerOn);
+    drawWave($('wAgent'), D.env_agent, t, getComputedStyle(document.body).getPropertyValue('--agent'), agentOn);
+
+    // stopwatch: runs from the end of the caller's turn until the agent starts, then holds the measured value
+    const clock = $('clock'), val = $('clockVal');
+    let shown = false;
+    for (const g of D.gaps) {
+      if (t >= g.start && t < g.end) {
+        shown = true; clock.className = 'clock show run'; val.textContent = ((t - g.start)).toFixed(1) + ' s';
+        if (g.no_response && t - g.start > 6) { clock.className = 'clock show slow'; val.textContent = 'No reply'; }
+      } else if (g.latency_ms != null && t >= g.end && t < g.end + 2.2) {
+        shown = true; clock.className = 'clock show ' + band(g.latency_ms); val.textContent = fmtS(g.latency_ms);
+      }
+    }
+    if (!shown) clock.className = 'clock';
+
+    // progress + running average
+    $('fill').style.width = Math.min(100, 100 * t / D.end) + '%';
+    const done = D.gaps.filter((g) => g.latency_ms != null && t >= g.end);
+    const n = D.caller.filter((c) => c.start <= t).length;
+    const avg = done.length ? done.reduce((a, g) => a + g.latency_ms, 0) / done.length : null;
+    $('stats').innerHTML = 'Turn <b>' + Math.max(n, 0) + '</b> / ' + D.caller.length +
+      (avg != null ? ' &nbsp;·&nbsp; Avg response <b>' + fmtS(avg) + '</b>' : '');
+
+    // closing card
+    const end = $('end');
+    end.style.opacity = endP > 0 ? Math.min(1, endP * 3) : 0;
+    return true;
+  };
+})();
+</script>
+</body>
+</html>

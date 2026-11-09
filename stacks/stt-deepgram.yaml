@@ -1,0 +1,12 @@
+# Deepgram Nova-3 (US). Key: DEEPGRAM_API_KEY.
+# STT swap of ref-pipeline.
+name: Nova-3 Arabic · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Deepgram STT
+display_sub: Nova-3 Arabic · ref LLM + TTS
+provider: deepgram + openai + elevenlabs
+kind: pipeline
+stt: {plugin: deepgram, model: nova-3, language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. language ar (Nova-3 multi has no Arabic).'

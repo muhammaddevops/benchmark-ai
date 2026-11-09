@@ -1,0 +1,9 @@
+# Google Gemini Live (native audio) speech-to-speech via the Gemini API (GOOGLE_API_KEY). Plugin-default model.
+name: Google Gemini Live (speech-to-speech)
+display: Gemini Live
+display_sub: native audio · speech-to-speech
+provider: google
+kind: realtime
+realtime: {plugin: google}
+requires: [GOOGLE_API_KEY]
+notes: Plugin default model and voice (Puck); vendor default turn detection.

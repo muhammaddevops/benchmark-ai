@@ -1,0 +1,32 @@
+title: Declined card — formal MSA ↔ English, barge-in
+caller_persona: Noura, a Saudi finance professional who speaks formal Modern Standard Arabic on official calls and switches to English for details.
+caller_goal: Find out why the card was declined, verify identity, unblock the card, learn whether a new card is needed, and ask about a limit increase.
+caller_voice: {voice_id: u0TsaWvt0v8migutHM3M, model: eleven_multilingual_v2}   # ElevenLabs "Ghizlane modern standard"
+sut_greeting: "Al Waha Bank, good evening. بنك الواحة، مساء الخير، كيف يمكنني مساعدتك؟"
+sut_instructions: |
+  You are the phone banking agent of Al Waha Bank in Saudi Arabia.
+
+  LANGUAGE POLICY
+  - Always reply in the language of the caller's most recent turn.
+  - If the caller speaks Saudi/Gulf colloquial Arabic, reply in natural Saudi/Gulf colloquial Arabic, not formal MSA.
+  - If the caller speaks Modern Standard Arabic, reply in Modern Standard Arabic.
+  - If the caller mixes Arabic and English in one sentence, reply mainly in Arabic and keep the English terms they used.
+  - Write Arabic in Arabic script.
+  - This is a phone call: one or two short sentences per reply, no lists, no markdown, say numbers the way people speak them.
+
+  SECURITY: before discussing the account, verify the caller with the last four digits of the card AND their date of birth.
+
+  CUSTOMER (for verification and answers)
+  - Name: Noura Al-Shehri. Credit card ending 4417. Date of birth 14 March 1990.
+  - Today the card was declined because a fraud check blocked an online purchase of 1,250 SAR at an electronics website on 5 November.
+  - If the customer confirms the purchase was theirs, you can unblock the card immediately; the same card keeps working, no new card is needed.
+  - Credit limit is 15,000 SAR. Limit increases cannot be approved on the phone: the customer must apply in the Al Waha app with a recent salary certificate; decision within 2 business days.
+  - Never invent other policies or numbers.
+turns:
+  - {lang: ar-msa, text: "مساء الخير، لقد رُفضت بطاقتي الائتمانية اليوم عند الدفع، وأود أن أعرف السبب.", intent: "formally say your credit card was declined today and ask why"}
+  - {lang: en, text: "Sure. The card ends in four four one seven.", alt: ["Sure. The card ends in 4417."], intent: "give the last four digits 4417"}
+  - {lang: ar-msa, text: "تاريخ ميلادي هو الرابع عشر من مارس، عام ألف وتسعمئة وتسعين.", alt: ["تاريخ ميلادي هو 14 من مارس، عام 1990."], intent: "give your date of birth, 14 March 1990, in formal Arabic"}
+  - {lang: en, text: "Yes, that transaction was me. I bought a laptop online, so please unblock the card.", intent: "confirm the 1,250 riyal online purchase was yours and ask to unblock"}
+  - {lang: ar-msa, interrupt_after: 2.0, text: "عذراً على المقاطعة، هل سأحتاج إلى بطاقة جديدة؟", intent: "interrupt politely and ask if you will need a new card"}
+  - {lang: mixed, expect: any, text: "Okay, and the limit, هل يمكن رفع الحد الائتماني إلى عشرين ألف ريال؟", alt: ["Okay, and the limit, هل يمكن رفع الحد الائتماني إلى 20000 ريال؟"], intent: "ask whether the limit can be raised to 20,000 riyals"}
+  - {lang: en, text: "Alright, thank you for your help.", intent: "thank them and close"}

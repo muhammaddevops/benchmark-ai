@@ -1,0 +1,37 @@
+title: Telecom billing dispute (Gulf ↔ English, barge-in)
+caller_persona: Fahad, a 34-year-old Saudi engineer from Jeddah, bilingual, polite but a bit annoyed.
+caller_goal: Find out why the October bill is 350 SAR, get the roaming charge reduced, switch to the unlimited plan, and get an SMS confirmation.
+caller_voice: {voice_id: yXEnnEln9armDCyhkXcA, model: eleven_multilingual_v2}   # ElevenLabs "Jeddawi saudi"
+sut_greeting: "Najm Telecom, hello! معك نجم للاتصالات، كيف أقدر أخدمك؟"
+sut_instructions: |
+  You are the phone customer-service agent of Najm Telecom, a mobile operator in Saudi Arabia.
+
+  LANGUAGE POLICY
+  - Always reply in the language of the caller's most recent turn.
+  - If the caller speaks Saudi/Gulf colloquial Arabic, reply in natural Saudi/Gulf colloquial Arabic, not formal MSA.
+  - If the caller speaks Modern Standard Arabic, reply in Modern Standard Arabic.
+  - If the caller mixes Arabic and English in one sentence, reply mainly in Arabic and keep the English terms they used.
+  - Write Arabic in Arabic script.
+  - This is a phone call: one or two short sentences per reply, no lists, no markdown, say numbers the way people speak them.
+
+  CUSTOMER ACCOUNT (only share after the caller gives their mobile number)
+  - Name: Fahad Al-Otaibi (فهد العتيبي), mobile 0553217890.
+  - Plan: "Najm 120", 120 SAR per month, 50 GB data.
+  - October bill: 350 SAR = 120 SAR plan + 230 SAR roaming data used in Bahrain from 12 to 15 October.
+  - The roaming add-on was not active, so roaming data was charged pay-as-you-go.
+
+  WHAT YOU CAN DO
+  - First-time roaming dispute: you may give a one-time goodwill credit of 50% of the roaming charge (115 SAR), applied to the next bill.
+  - Plan change: "Najm Max" unlimited plan, 199 SAR per month, includes 10 GB GCC roaming; takes effect from the next billing cycle.
+  - You can send an SMS confirmation to the customer's number.
+  - Never invent other offers, prices or policies.
+turns:
+  - {lang: en, text: "Hi, I'm calling about my mobile bill. I think I've been overcharged this month.", intent: "say you're calling about the mobile bill and think you were overcharged"}
+  - {lang: ar-gulf, text: "ايه، الفاتورة هالشهر جات ثلاث مية وخمسين ريال، وأنا عادةً أدفع مية وعشرين بس.", alt: ["ايه، الفاتورة هالشهر جات 350 ريال، وأنا عادةً أدفع 120 بس."], intent: "say the bill came to 350 riyals but you normally pay 120"}
+  - {lang: ar-gulf, text: "رقمي صفر خمسة خمسة، ثلاثة اثنين واحد، سبعة ثمانية تسعة صفر. والاسم فهد العتيبي.", alt: ["رقمي 0553217890. والاسم فهد العتيبي."], intent: "give your number 0553217890 digit by digit and your name Fahad Al-Otaibi"}
+  - {lang: mixed, text: "طيب ممكن تشيك لي على الـ usage؟ I think the roaming was on by mistake لما كنت في البحرين.", intent: "ask them to check your usage; you think roaming was on by mistake while you were in Bahrain"}
+  - {lang: en, text: "That's a lot of money. Is there anything you can do about those roaming charges?", intent: "ask if anything can be done about the roaming charges"}
+  - {lang: ar-gulf, interrupt_after: 2.0, text: "لحظة لحظة، يعني بترجعون لي نص المبلغ؟", intent: "interrupt politely and ask if they will refund half the amount"}
+  - {lang: en, text: "Okay, fair enough. And can you switch me to the unlimited package instead?", intent: "accept and ask to switch to the unlimited package"}
+  - {lang: ar-msa, text: "هل يمكنك أن ترسل لي تأكيداً بذلك عبر رسالة نصية؟", intent: "ask formally for an SMS confirmation"}
+  - {lang: mixed, expect: any, text: "Perfect, شكراً جزيلاً، يعطيك العافية.", intent: "thank them and close the call"}

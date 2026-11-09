@@ -1,0 +1,10 @@
+# ZIWO AI Voice Agent, tested as a black box over the phone (domestic). How to get a number: demo number.
+# Set it up with `bench brief <scenario>`, put its number in .env as ZIWO_AGENT_NUMBER, needs BENCH_SIP_TRUNK_ID once.
+name: ZIWO AI Voice Agent (phone)
+display: ZIWO (Dubai)
+display_sub: hosted agent · via phone
+provider: ziwo
+kind: phone
+phone: {number_env: ZIWO_AGENT_NUMBER, trunk_env: BENCH_SIP_TRUNK_ID}
+notes: Black box over the phone network (adds ~0.3-0.6 s and narrowband audio). Record the platform's voice, model and language
+  settings here before publishing.

@@ -1,0 +1,13 @@
+# Falcon 3 7B (UAE, TII) as the brain, everything else identical to the all-local baseline
+# (Whisper turbo STT + macOS voices on this Mac). Pull once: ollama pull falcon3:7b
+name: Whisper turbo (local) · Falcon 3 7B (local) · macOS voices
+display: Falcon 3 7B · UAE
+display_sub: Falcon 3 7B on a Mac · local speech
+provider: local (falcon3-7b)
+kind: pipeline
+stt: {plugin: localspeech}
+llm: {plugin: ollama, model: 'falcon3:7b', max_tokens: 220}
+tts: {plugin: localspeech, voice: auto}
+turn_detection: turn-detector
+notes: 'LLM test on local hardware: only the LLM differs from local-all_whisper_qwen3-8b_macvoice. Q4_K_M quantisation on
+  an M4 Pro, so speed and quality are below the vendor''s hosted model.'

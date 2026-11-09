@@ -1,0 +1,18 @@
+# Soniox (US; 60+ languages, mid-sentence code-switching). Key: SONIOX_API_KEY.
+# STT swap of ref-pipeline.
+name: Soniox stt-rt-v5 · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Soniox STT
+display_sub: Soniox stt-rt-v5 · ref LLM + TTS
+provider: soniox + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: custom
+  factory: bench.factories:soniox_stt
+  options:
+    model: stt-rt-v5
+    language_hints: [ar, en]
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. language hints ar + en.'
+requires: [SONIOX_API_KEY]

@@ -1,0 +1,10 @@
+# Vapi assistant, tested as a black box over the phone (global). How to get a number: self-serve: import a number.
+# Set it up with `bench brief <scenario>`, put its number in .env as VAPI_AGENT_NUMBER, needs BENCH_SIP_TRUNK_ID once.
+name: Vapi assistant (phone)
+display: Vapi
+display_sub: hosted agent · via phone
+provider: vapi
+kind: phone
+phone: {number_env: VAPI_AGENT_NUMBER, trunk_env: BENCH_SIP_TRUNK_ID}
+notes: Black box over the phone network (adds ~0.3-0.6 s and narrowband audio). Record the platform's voice, model and language
+  settings here before publishing.

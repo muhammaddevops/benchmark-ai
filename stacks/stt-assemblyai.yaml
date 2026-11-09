@@ -1,0 +1,16 @@
+# AssemblyAI Universal-3.6 Pro realtime (code-switching incl. Arabic). Key: ASSEMBLYAI_API_KEY.
+# STT swap of ref-pipeline.
+name: Universal-3.6 Pro · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: AssemblyAI STT
+display_sub: Universal-3.6 Pro · ref LLM + TTS
+provider: assemblyai + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: assemblyai
+  model: universal-3-6-pro
+  kwargs:
+    language_codes: [ar, en]
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline.'

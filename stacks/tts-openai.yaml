@@ -1,0 +1,20 @@
+# OpenAI gpt-4o-mini-tts. Key: OPENAI_API_KEY.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · gpt-4o-mini-tts
+display: OpenAI TTS
+display_sub: gpt-4o-mini-tts · ref STT + LLM
+provider: elevenlabs + openai + openai
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts:
+  plugin: openai
+  model: gpt-4o-mini-tts
+  voice: ash
+  kwargs: {instructions: Speak like a friendly Saudi customer-service agent. Use a Gulf accent in Arabic.}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline.'

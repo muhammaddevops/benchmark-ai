@@ -1,0 +1,18 @@
+# CAMB.AI MARS (Dubai/SF) realtime TTS. Key: CAMB_API_KEY. Plugin: livekit-plugins-cambai (official).
+# Set voice_id to an Arabic (Saudi) voice from your CAMB voice library; the plugin default voice is English.
+# TTS swap of ref-pipeline.
+name: Scribe v2 RT · GPT-5.4 mini · MARS Flash
+display: CAMB.AI TTS (Dubai)
+display_sub: MARS Flash · ref STT + LLM
+provider: elevenlabs + openai + cambai
+kind: pipeline
+stt:
+  plugin: elevenlabs
+  model: scribe_v2_realtime
+  extra:
+    server_vad: {vad_silence_threshold_secs: 0.6}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: cambai, model: mars-flash, language: ar-sa}
+turn_detection: turn-detector
+notes: 'TTS test: only the TTS differs from ref-pipeline. language ar-sa; verify the locale code and pick an Arabic voice_id
+  (kwargs) before publishing.'

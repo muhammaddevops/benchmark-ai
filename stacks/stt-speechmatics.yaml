@@ -1,0 +1,13 @@
+# Speechmatics (UK; Arabic incl. Gulf). Key: SPEECHMATICS_API_KEY.
+# STT swap of ref-pipeline.
+name: Speechmatics Arabic · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Speechmatics STT
+display_sub: Speechmatics Arabic · ref LLM + TTS
+provider: speechmatics + openai + elevenlabs
+kind: pipeline
+stt: {plugin: speechmatics, language: ar}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. language ar (Speechmatics also sells an Arabic-English bilingual
+  pack: try language ar_en in a tuned variant).'

@@ -1,0 +1,15 @@
+# Gladia Solaria (France; code-switching). Key: GLADIA_API_KEY.
+# STT swap of ref-pipeline.
+name: Solaria ar + en · GPT-5.4 mini · ElevenLabs Flash v2.5
+display: Gladia STT
+display_sub: Solaria ar + en · ref LLM + TTS
+provider: gladia + openai + elevenlabs
+kind: pipeline
+stt:
+  plugin: gladia
+  language: [ar, en]
+  kwargs: {code_switching: true}
+llm: {plugin: openai, model: gpt-5.4-mini}
+tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
+turn_detection: turn-detector
+notes: 'STT test: only the STT differs from ref-pipeline. code_switching on.'
