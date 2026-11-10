@@ -130,7 +130,7 @@ def caller_score(s: dict[str, Any]) -> dict[str, Any]:
         parts["quality"] = (s["judge_overall"] * 10, 0.25)
     if s.get("judge_task_success") is not None:
         parts["task"] = (s["judge_task_success"] * 100, 0.20)
-    rel = 100 - 25 * (s.get("no_response", 0) + s.get("errors", 0))
+    rel = 100 - 25 * (s.get("no_response", 0) + s.get("errors", 0) + s.get("turns_not_reached", 0))
     parts["reliability"] = (max(0, rel), 0.10)
     w = sum(x[1] for x in parts.values())
     score = sum(v * wt for v, wt in parts.values()) / w if w else None
@@ -387,6 +387,9 @@ async def analyze_run(run_dir: Path, judge: bool = True, rescribe: bool = False)
                 if r["idx"] == jt.get("idx"):
                     r["judge"] = jt
     summary["composite"] = composite(summary)
+    inc = meta.get("incomplete") or {}
+    summary["incomplete"] = bool(inc)
+    summary["turns_not_reached"] = max(0, inc.get("turns_total", 0) - inc.get("turns_done", 0)) if inc else 0
     summary["caller_score"] = caller_score(summary)
     summary["transcriber"] = sorted({v.get("engine", "elevenlabs-scribe") for v in spoken.values() if v.get("text")})
 

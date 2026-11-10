@@ -213,6 +213,12 @@ async def run_one(stack_id: str, scenario_id: str, mode: str = "scripted", judge
                 )
             )
         result = await asyncio.wait_for(caller.run(), timeout=scenario.get("max_duration_s", 420))
+    except TimeoutError:
+        # the call ran past the scenario's limit (usually very long replies): score the turns that completed
+        result = getattr(caller, "result", None) if caller else None
+        done, total = len(result.turns) if result else 0, len(scenario.get("turns", []))
+        logger.warning("call hit the %ss limit after %d of %d turns", scenario.get("max_duration_s", 420), done, total)
+        meta["incomplete"] = {"reason": "call duration limit", "turns_done": done, "turns_total": total}
     except Exception as e:  # noqa: BLE001
         logger.exception("call failed")
         meta["call_error"] = repr(e)

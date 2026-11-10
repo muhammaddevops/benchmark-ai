@@ -76,7 +76,7 @@ def timeline(run_dir: Path, turns: tuple[int, int] | None = None) -> dict[str, A
             ok = None if r.get("expect") == "any" else bool(r.get("spoken_lang_ok") if r.get("spoken_text") else r.get("lang_ok"))
             agent.append({"start": r["onset"], "end": r.get("reply_end") or r["onset"] + 2, "text": text, "lang_ok": ok,
                           "reply_lang_label": "Replied in " + LANG_LABEL.get(r.get("reply_lang") or "", "?")})
-        if not r.get("interrupt"):
+        if not r.get("interrupt") and not r.get("talk_over"):  # an agent talking over the caller has no gap to time
             gaps.append({"start": r["t_end"], "end": r["onset"] if r.get("onset") is not None else r["t_end"] + 8,
                          "latency_ms": r.get("latency_ms"), "no_response": bool(r.get("no_response"))})
     end = max([e["end"] for e in caller + agent] + [g["end"] for g in gaps]) + 0.8

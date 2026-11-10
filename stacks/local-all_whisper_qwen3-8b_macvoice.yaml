@@ -2,8 +2,8 @@
 # STT: Whisper large-v3-turbo (mlx-whisper, language ID restricted to Arabic/English)
 # LLM: Qwen3 8B via Ollama   TTS: macOS voices (Majed for Arabic, Samantha for English, switched per phrase)
 name: Whisper turbo (local) · Qwen3 8B (local) · macOS voices
-display: All-local baseline (Mac)
-display_sub: "Whisper turbo · Qwen3 8B · macOS Majed/Samantha"
+display: Qwen3 8B · global ref
+display_sub: "Qwen3 8B (Alibaba) on a Mac · local speech"
 provider: local
 kind: pipeline
 stt: {plugin: localspeech}

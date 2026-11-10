@@ -62,7 +62,7 @@ how it's reached, its key names and its stacks. Every provider is tested one of 
 | A hosted voice-agent platform (Maqsam, Nabrah, Hamsa, Vapi, Retell, ElevenLabs Agents...) | dial its agent's number (`kind: phone`) | the agent set up with `bench brief <scenario>`, its number in `.env`, the one-time SIP trunk (`scripts/setup_sip.py --apply`) |
 | A WebSocket/web API only | a bridge (`bench/bridges/`) | a small adapter |
 
-Stack families in `stacks/` (`bench list` shows which are ready):
+Stack families in `stacks/` (`bench list` shows which are ready; `bench new stt <x> --plugin <x> --model ...` writes one for a provider that isn't there yet):
 
 | Prefix | What varies | Held constant |
 |---|---|---|

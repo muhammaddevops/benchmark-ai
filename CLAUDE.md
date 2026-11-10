@@ -13,7 +13,9 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
    its key names, its stacks) and `.venv/bin/python -m bench providers`. Then `.venv/bin/python -m bench doctor`.
    If X isn't there, research it (docs, PyPI `livekit-plugins-<x>`, OpenAI-compatible endpoints, phone agents) and
    add an entry.
-2. **Pick the stack** (most providers already have one: `stacks/<family>-<x>.yaml`, see `stacks/README.md`):
+2. **Pick the stack** (most providers already have one: `stacks/<family>-<x>.yaml`, see `stacks/README.md`).
+   For a new one, `bench new <stt|tts|llm|s2s|agent> <x> --plugin ... --model ... [--voice/--language/--base-url/--key]`
+   writes it with everything else held at the reference (`--local`: at the all-local baseline):
    - **Component** (STT / TTS / LLM): the `stt-*`, `tts-*`, `llm-*` files are the reference pipeline
      (`ref-pipeline.yaml`: Scribe v2 RT · GPT-5.4 mini · Flash v2.5) with exactly one part swapped. New provider:
      copy the closest one and change only that part. `plugin: <x>` for any installed LiveKit plugin (openai,

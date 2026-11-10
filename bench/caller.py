@@ -307,7 +307,7 @@ class Caller:
         )
 
     async def run(self) -> CallResult:
-        res = CallResult(t0=self.rec.t0)
+        res = self.result = CallResult(t0=self.rec.t0)  # kept on self so a timed-out call can still be scored
         track = rtc.LocalAudioTrack.create_audio_track("caller-mic", self.source)
         await self.room.local_participant.publish_track(
             track, rtc.TrackPublishOptions(source=rtc.TrackSource.SOURCE_MICROPHONE)

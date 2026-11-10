@@ -43,6 +43,13 @@ def main() -> None:
     pv = sub.add_parser("providers")
     pv.add_argument("--group", choices=["domestic", "global"])
     sub.add_parser("list")
+    nw = sub.add_parser("new", help="write a stack for a new provider (see bench/scaffold.py)")
+    nw.add_argument("role", choices=["stt", "tts", "llm", "s2s", "agent"])
+    nw.add_argument("name")
+    for opt in ("--plugin", "--model", "--voice", "--language", "--base-url", "--key", "--display"):
+        nw.add_argument(opt)
+    nw.add_argument("--local", action="store_true", help="hold the local speech constant instead of the reference")
+    nw.add_argument("--force", action="store_true")
     b = sub.add_parser("brief")
     b.add_argument("scenario")
     r = sub.add_parser("run")
@@ -100,6 +107,15 @@ def main() -> None:
         from .providers import print_providers
 
         print_providers(args.group)
+    elif args.cmd == "new":
+        from .scaffold import new_stack
+        from .stacks import load_stack, requirements
+
+        p = new_stack(args.role, args.name, plugin=args.plugin, model=args.model, voice=args.voice,
+                      language=args.language, base_url=args.base_url, key=args.key, display=args.display,
+                      local=args.local, force=args.force)
+        miss = requirements(load_stack(str(p)))
+        print(f"{p}\n  {'ready' if not miss else 'needs ' + ', '.join(miss)}")
     elif args.cmd == "list":
         from .run import all_scenarios, load_scenario
         from .stacks import describe, list_stacks, requirements

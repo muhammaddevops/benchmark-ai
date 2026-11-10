@@ -1,6 +1,6 @@
 # Jais 3 7B (UAE, MBZUAI IFM) via Ollama with the reference speech (ElevenLabs). Pull once: ollama pull hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M
 name: Scribe v2 RT · Jais 3 7B (local) · ElevenLabs Flash v2.5
-display: Jais 3 7B · UAE
+display: Jais 3 7B · UAE (reasoning)
 display_sub: local LLM · ref STT + TTS
 provider: elevenlabs + local (jais-3-7b)
 kind: pipeline
@@ -9,7 +9,9 @@ stt:
   model: scribe_v2_realtime
   extra:
     server_vad: {vad_silence_threshold_secs: 0.6}
-llm: {plugin: ollama, model: 'hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M', max_tokens: 220}
+llm: {plugin: ollama, model: 'hf.co/IFM/Jais-3-7B-GGUF:Q4_K_M', max_tokens: 1500, think: true}
 tts: {plugin: elevenlabs, model: eleven_flash_v2_5, voice: EXAVITQu4vr4xnSDxMaL}
 turn_detection: turn-detector
-notes: 'LLM test: only the LLM differs from ref-pipeline.'
+notes: 'Jais 3 is a reasoning model: its chat template always thinks before answering (no off switch in the
+  GGUF template; an empty-think prefill made it reason in the reply instead), so it runs as shipped with a larger
+  token budget. Expect long pauses; the reasoning is not spoken. Q4_K_M on an M4 Pro.'
