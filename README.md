@@ -92,6 +92,24 @@ Stack families in `stacks/` (`bench list` shows which are ready; `bench new stt 
 
 `docs/providers-research.md` has the research summary and sources. Vendor claims are unverified until benchmarked.
 
+## First results (2026-11-10): Gulf open LLMs on a Mac
+
+Bracket A of `docs/linkedin-playbook.md`: same caller, same three scenarios, same local speech (Whisper turbo +
+macOS voices) on an M4 Pro; only the LLM changes (Q4_K_M via Ollama). Judge: local Qwen3 14B (rejudge with a
+hosted judge before publishing). Charts: `results/charts/gulf-open-llms/`; video: `results/videos/gulf-open-llms/`.
+
+| Model | Caller score | Calls | Typical / slow reply | Right language | Quality | Task done |
+|---|---|---|---|---|---|---|
+| ALLaM 7B · Saudi | 61.6 | 3 | 3.85 / 6.57 s | 56% | 8/10 | 100% |
+| Falcon-H1 7B · UAE | 57.8 | 3 | 4.10 / 6.97 s | 69% | 6/10 | 97% |
+| Fanar 1 9B · Qatar | 53.3 | 3 | 4.00 / 4.71 s | 50% | 7.2/10 | 80% |
+| Qwen3 8B · global reference | 50.5 | 3 | 4.49 / 8.73 s | 44% | 6.5/10 | 83% |
+| Falcon 3 7B · UAE | 43.1 | 3 | 4.17 / 5.59 s | 56% | 4.3/10 | 53% |
+| Jais 3 7B · UAE (reasoning) | 29.2 | 1 | 13.0 / 14.3 s | 33% | 5/10 | 50% |
+
+All replies take ~4 s here because the speech runs locally (batch Whisper, system voices); the hosted stacks measured
+on 2026-11-07 answered in 1.5-3 s. Every model often answered English questions in Arabic once the call was in Arabic.
+
 ## Scenarios
 
 | Scenario | What it tests |

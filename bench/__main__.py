@@ -158,6 +158,8 @@ def main() -> None:
 
         need_worker = any(not load_stack(st).get("blackbox") for st in stacks)
         w, ls = Worker(), LocalSpeech()
+        if sys.platform == "darwin":  # a sleeping Mac stalls calls for hours (seen 2026-11-10): stay awake while running
+            subprocess.Popen(["caffeinate", "-ims", "-w", str(os.getpid())])
         try:
             if any(uses_localspeech(load_stack(st)) for st in stacks):
                 ls.start()
