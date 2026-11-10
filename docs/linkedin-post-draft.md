@@ -37,4 +37,4 @@ models' Arabic conversation skills under identical conditions, nothing more. 3 c
 Next: the hosted versions, Arabic speech-to-text (HUMAIN, Munsit, Nabrah, Sarj vs global), and the Gulf's voice-agent
 platforms by phone. Which provider should we call next?
 
-[video: comparison montage] [image: caller score chart]
+[video: results/videos/gulf-open-llms-short/gulf-open-llms-short.mp4 (2:56 square)] [image: results/charts/gulf-open-llms/score_square.png]
