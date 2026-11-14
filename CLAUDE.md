@@ -28,8 +28,9 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
    - **Hosted voice-agent platform**: black box, by phone (`agent-*`). Print the brief with `bench brief
      <scenario>` for the user to paste into the platform; they give you the agent's number; it goes in `.env` as
      `<X>_AGENT_NUMBER`. Needs `BENCH_SIP_TRUNK_ID` once (`scripts/setup_sip.py --apply`, **only with the user's
-     OK**: it changes their Twilio and LiveKit accounts; the user approved it on 2026-11-14) and Twilio geo permissions for the country dialled. The Twilio key in .env is restricted and lacks the SIP permissions
-     (2026-11-14): the dry run names what's missing. TWILIO_FROM_NUMBER's incoming calls go to an ElevenLabs
+     OK**: it changes their Twilio and LiveKit accounts; the user approved it on 2026-11-14) and Twilio geo permissions for the country dialled. Created 2026-11-14 (Twilio trunk `lk-bench`, credential list `lk-bench-34b3`,
+     LiveKit trunk `lk-bench (Twilio)`). The Twilio key in .env is restricted: it can't link a credential list to a
+     trunk (no such permission for restricted keys), so a re-run prints that one console step. TWILIO_FROM_NUMBER's incoming calls go to an ElevenLabs
      agent, so the script uses it as caller ID only and never moves it onto the trunk unless `--attach-number`.
    - **SDK or WebSocket API only** (no LiveKit plugin): a `plugin: custom` adapter in `bench/adapters/`
      (`humain.py` wraps HUMAIN's SDK as a LiveKit STT/TTS: copy it for Hamsa etc.), or, for a whole hosted agent, a

@@ -107,12 +107,25 @@ def main() -> None:
         return
 
     trunk = existing or tw("POST", TRUNKS, {"FriendlyName": NAME, "DomainName": domain})
-    cl = tw("POST", f"{API}/SIP/CredentialLists.json", {"FriendlyName": f"{NAME}-{secrets.token_hex(2)}"})
+    lists = tw("GET", f"{API}/SIP/CredentialLists.json").get("credential_lists", [])
+    cl = next((c for c in lists if c["friendly_name"].startswith(NAME)), None) or \
+        tw("POST", f"{API}/SIP/CredentialLists.json", {"FriendlyName": f"{NAME}-{secrets.token_hex(2)}"})
+    # a fresh login every run: Twilio never returns passwords, so an earlier one can't be reused
     tw("POST", f"{API}/SIP/CredentialLists/{cl['sid']}/Credentials.json", {"Username": user, "Password": pwd})
-    tw("POST", f"{TRUNKS}/{trunk['sid']}/CredentialLists", {"CredentialListSid": cl["sid"]})
+    manual = None
+    try:
+        tw("POST", f"{TRUNKS}/{trunk['sid']}/CredentialLists", {"CredentialListSid": cl["sid"]})
+    except urllib.error.HTTPError as e:
+        if e.code == 400:  # already attached on an earlier run
+            pass
+        elif e.code in (401, 403):  # restricted keys have no permission for this sub-resource at all
+            manual = (f"In the Twilio console: Elastic SIP Trunking > Trunks > {NAME} > Termination > Authentication > "
+                      f"Credential lists: select '{cl['friendly_name']}' and Save.")
+        else:
+            raise
     if args.attach_number:
         tw("POST", f"{TRUNKS}/{trunk['sid']}/PhoneNumbers", {"PhoneNumberSid": num["sid"]})
-    print(f"Twilio trunk {trunk['sid']} ready")
+    print(f"Twilio trunk '{NAME}' ready; credential list '{cl['friendly_name']}' has login {user}")
 
     async def lk() -> str:
         from livekit import api
@@ -125,7 +138,9 @@ def main() -> None:
     tid = asyncio.run(lk())
     with (ROOT / ".env").open("a") as f:
         f.write(f"\nBENCH_SIP_TRUNK_ID={tid}\n")
-    print(f"LiveKit outbound trunk {tid} ready; BENCH_SIP_TRUNK_ID written to .env")
+    print(f"LiveKit outbound trunk ready; BENCH_SIP_TRUNK_ID written to .env")
+    if manual:
+        print("\n! One manual step (this API key can't link credential lists to trunks):\n  " + manual)
     print("Next: allow the Gulf countries in Twilio's Voice geo permissions, then `bench run -s agent-<x> -c <scenario>`")
 
 
