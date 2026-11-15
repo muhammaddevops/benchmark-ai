@@ -32,6 +32,10 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
      LiveKit trunk `lk-bench (Twilio)`). The Twilio key in .env is restricted: it can't link a credential list to a
      trunk (no such permission for restricted keys), so a re-run prints that one console step. TWILIO_FROM_NUMBER's incoming calls go to an ElevenLabs
      agent, so the script uses it as caller ID only and never moves it onto the trunk unless `--attach-number`.
+     Prefer a vendor's SIP address to its phone number (a LiveKit outbound trunk pointed at it, named in the stack's
+     `phone.trunk_env`); never mix SIP-dialled and phone-dialled agents on one chart. Twilio to +966/+971 is
+     documented but untested (2026-11-15). Pilot requests: `docs/vendor-outreach.md`. The buyer is a Gulf business
+     choosing a vendor (`docs/linkedin-playbook.md`, "Who it's for").
    - **SDK or WebSocket API only** (no LiveKit plugin): a `plugin: custom` adapter in `bench/adapters/`
      (`humain.py` wraps HUMAIN's SDK as a LiveKit STT/TTS: copy it for Hamsa etc.), or, for a whole hosted agent, a
      bridge in `bench/bridges/`.
