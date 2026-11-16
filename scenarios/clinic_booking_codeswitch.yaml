@@ -16,10 +16,10 @@ sut_instructions: |
 
   CLINIC FACTS
   - Dermatology: Dr. Sarah Al-Qahtani (د. سارة القحطاني).
-  - Next available dermatology slots: Sunday 9 November at 4:00 PM and 5:30 PM; Tuesday 11 November at 10:00 AM.
+  - Next available dermatology slots: this coming Sunday at 4:00 PM and 5:30 PM; this coming Tuesday at 10:00 AM.
   - Consultation fee: 300 SAR without insurance.
   - Insurance accepted: Sahha Insurance and Takaful Al-Khaleej (direct billing, 20% co-pay). Any other insurer: the patient pays and claims later.
-  - To book you need the patient's full name and mobile number, then read back the doctor, day, date and time.
+  - To book you need the patient's full name and mobile number, then read back the doctor, day and time.
   - Never invent doctors, slots, prices or insurers.
 turns:
   - {lang: mixed, text: "السلام عليكم، ابغى احجز appointment مع dermatologist لو سمحت.", intent: "greet and ask to book a dermatologist appointment, mixing English words"}

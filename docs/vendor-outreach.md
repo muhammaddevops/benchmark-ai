@@ -14,9 +14,10 @@ the brief yourself.
 3. **Buyer facts:** their price per minute for the AI agent, and the country where calls and data are processed.
 4. **OK to be named** in a published comparison. Offer to share their own results with them first.
 
-Before sending: the clinic brief lists slots on "Sunday 9 November" and "Tuesday 11 November", which are now in the
-past. A platform that tells its agent today's date may refuse them. Decide whether to move the dates (the earlier
-runs would then need re-running) or accept the risk.
+The briefs carry no calendar dates (since 2026-11-16: the clinic slots are "this coming Sunday/Tuesday", the bank's
+blocked purchase has no date), so they don't go stale and a platform that tells its agent today's date won't see a
+contradiction. Calls before then used the dated version; each run keeps its own copy (`scenario.json`), so judging
+stays consistent, but chart dated and undated calls separately (`bench charts --since 2026-11-16`).
 
 ## Message template
 
