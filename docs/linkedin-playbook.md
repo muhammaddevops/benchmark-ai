@@ -14,6 +14,8 @@ vendors. So:
    method is rigorous.
 3. C, D and A support them. A (open models on a Mac) is done; label it "on a laptop".
 
+The caller stays Saudi for now (decided 2026-11-16); add an Emirati caller later if UAE buyers ask for one.
+
 Besides the scores, a buyer will ask each vendor's price per minute, where calls and data are processed, and which
 dialects and channels it covers. Collect those during the pilot and quote them as the vendor's own figures.
 
