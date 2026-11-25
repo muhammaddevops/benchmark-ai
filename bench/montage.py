@@ -1,7 +1,12 @@
 """The LinkedIn comparison video: title card -> the same moment of the same scripted call for each provider ->
-animated benchmark charts -> method card.
+animated benchmark charts -> method card -> optional end card.
 
   python -m bench montage -s <stack> -s <stack> ... -c <scenario> [--turns 0-1] [--format landscape|square|vertical]
+                          [--since 2026-11-25] [--end-card card.yaml]
+
+--since keeps only runs from that date on (clips and charts), so a re-run batch isn't mixed with older calls.
+--end-card is a YAML/JSON file with the card fields (kicker, title, ar, lede, items, foot, seconds): an offer or a
+contact card. Keep it outside the repo (e.g. results/), since it is your own text.
 
 Each provider's clip comes from its latest valid run of the scenario (render a call with `bench video` first if you
 want to check it). Clips are cut at the same turns, so viewers hear every agent answer the same caller lines.
@@ -24,10 +29,12 @@ CARD = Path(__file__).parent / "templates" / "card.html"
 CHART_FMT = {"landscape": "landscape", "square": "square", "vertical": "vertical"}
 
 
-def latest_run(stack_id: str, scenario_id: str) -> Path | None:
+def latest_run(stack_id: str, scenario_id: str, since: str | None = None) -> Path | None:
     best = None
     for f in sorted(RUNS_DIR.glob(f"*_{stack_id}_{scenario_id}_*/metrics.json")):
         m = json.loads(f.read_text())
+        if since and (m.get("date") or "") < since:
+            continue
         if m.get("stack_id") == stack_id and m.get("scenario_id") == scenario_id and valid(m):
             best = f.parent
     return best
@@ -78,16 +85,19 @@ def concat(parts: list[Path], out: Path, fmt: str) -> Path:
 
 
 def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 1), fmt: str = "landscape",
-          name: str | None = None, title: str | None = None) -> Path:
+          name: str | None = None, title: str | None = None, since: str | None = None,
+          end_card: Path | None = None) -> Path:
     name = name or f"{datetime.now():%Y%m%d}-{scenario}-{fmt}"
     out_dir = RESULTS_DIR / "videos" / name
     out_dir.mkdir(parents=True, exist_ok=True)
-    runs = {s: latest_run(s, scenario) for s in stacks}
+    runs = {s: latest_run(s, scenario, since) for s in stacks}
     missing = [s for s, r in runs.items() if r is None]
     if missing:
         raise SystemExit(f"no valid run of {scenario} for: {', '.join(missing)} (run `bench run -s <stack> -c {scenario}`)")
     labels = {s: (load_stack(s).get("display") or load_stack(s).get("name", s)) for s in stacks}
     scen = json.loads((next(iter(runs.values())) / "scenario.json").read_text())
+    local = all(json.loads((r / "meta.json").read_text()).get("local_only") for r in runs.values())
+    where = "on one Mac" if local else "over the live network"
 
     parts = [card({
         "kicker": "Gulf Voice AI Benchmark",
@@ -96,7 +106,7 @@ def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 
         "lede": f"{scen.get('title', scenario)}: English, Gulf Arabic and code-switching. "
                 "Every response time is real; only the caller's own pauses are trimmed.",
         "items": [labels[s] for s in stacks],
-        "foot": "Scripted mock calls over the live network · scored from the recordings",
+        "foot": f"Scripted mock calls {where} · scored from the recordings",
     }, fmt, 4.0, out_dir / "00_intro.mp4")]
 
     for i, s in enumerate(stacks, 1):
@@ -104,7 +114,7 @@ def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 
         render(runs[s], fmt, turns=turns, end_card=3.0, out=clip, label=labels[s])
         parts.append(clip)
 
-    rows = collect(stacks=stacks)
+    rows = collect(stacks=stacks, since=since)
     chart_dir = render_all(name, rows, kicker=scen.get("title", ""), formats=(CHART_FMT[fmt],), animate=False)
     from playwright.sync_api import sync_playwright
 
@@ -118,12 +128,17 @@ def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 
     parts.append(anim)
     parts.append(card({
         "kicker": "How we tested",
-        "title": "Same script, same voice, same network.",
+        "title": "Same script, same voice, same Mac." if local else "Same script, same voice, same network.",
         "lede": "A simulated Saudi caller (ElevenLabs voices) places a live call to each agent. Response time is measured "
                 "from the recording: caller stops, agent starts. Language, answer quality and task success come from "
                 "the transcripts and an LLM judge.",
         "items": ["English", "Gulf Arabic", "MSA", "Code-switching"],
         "foot": f"Charts and per-call reports: {chart_dir.name}",
     }, fmt, 5.0, out_dir / "99_method.mp4"))
+    if end_card:
+        import yaml
+
+        spec = yaml.safe_load(Path(end_card).read_text())
+        parts.append(card(spec, fmt, float(spec.pop("seconds", 5.0)), out_dir / "99z_end.mp4"))
     final = out_dir / f"{name}.mp4"
     return concat(parts, final, fmt)

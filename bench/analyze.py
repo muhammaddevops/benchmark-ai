@@ -361,6 +361,7 @@ async def analyze_run(run_dir: Path, judge: bool = True, rescribe: bool = False)
         "scenario_id": meta.get("scenario_id"),
         "mode": meta.get("mode"),
         "date": meta.get("date"),
+        "local_only": meta.get("local_only", False),
         "summary": summary,
         "turns": rows,
         "sut_errors": [e.get("error") for e in sut_errors][:20],

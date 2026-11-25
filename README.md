@@ -137,7 +137,7 @@ scripts/setup.sh                                  # environment, plugins, headle
 Keys go in `.env` (template: `.env.example`). To test a provider that already has a stack, add its key and run
 `bench run -s <stack> -c all` (about 4-5 minutes per call). For one that doesn't, `bench new <stt|tts|llm|s2s|agent>
 <name> --plugin ... --model ...` writes the stack with everything else held at the reference; `stacks/README.md`
-documents the format. Other commands: `bench list`, `bench brief`, `bench rejudge`, `bench montage`, `bench report`,
+documents the format. Other commands: `bench list`, `bench brief`, `bench rejudge`, `bench montage`, `bench fullreport` (a written report across systems, HTML + PDF), `bench report`,
 `bench serve`.
 
 ## Layout

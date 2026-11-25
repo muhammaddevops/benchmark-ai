@@ -78,6 +78,12 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
   the caller replays its cached lines (`results/.tts_cache`; new lines fall back to a macOS voice, logged),
   re-transcription of the agent uses local Whisper (`BENCH_TRANSCRIBER`, recorded as `summary.transcriber`), and
   the `local-all_*` stacks run entirely on this Mac.
+- **Spend nothing** (user, 2026-11-25: no ElevenLabs or other vendor credits unless they say so): start
+  `livekit-server --dev --bind 127.0.0.1 --node-ip 127.0.0.1` and `ollama serve`, then prefix commands with
+  `BENCH_LOCAL_ONLY=1`. It drops every vendor key from the environment (a vendor call fails instead of spending),
+  points LiveKit at the local server (devkey/secret), forces local Whisper and the local Ollama judge, and marks the
+  runs `local_only` (montage and fullreport then say "on one Mac"). Latency then has no internet round trip, so
+  don't mix these runs with Cloud runs in one chart (`--since`).
 - **Local speech server** (`bench/localspeech.py`, `plugin: localspeech`, auto-started by `bench run`, log
   `results/localspeech.log`): OpenAI-compatible on 127.0.0.1:8770. STT = mlx-whisper large-v3-turbo with language
   ID restricted to ar/en (unrestricted it translates Arabic to English); TTS = macOS `say`, Majed for Arabic

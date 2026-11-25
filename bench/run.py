@@ -21,7 +21,7 @@ import yaml
 from livekit import api, rtc
 
 from .caller import Caller
-from .config import CALLER_IDENTITY, RESULTS_DIR, ROOT, RUNS_DIR, SAMPLE_RATE, SCENARIOS_DIR, SUT_AGENT_NAME
+from .config import CALLER_IDENTITY, LOCAL_ONLY, RESULTS_DIR, ROOT, RUNS_DIR, SAMPLE_RATE, SCENARIOS_DIR, SUT_AGENT_NAME
 from .stacks import describe, load_stack
 
 logger = logging.getLogger("bench.run")
@@ -171,6 +171,7 @@ async def run_one(stack_id: str, scenario_id: str, mode: str = "scripted", judge
         "scenario_title": scenario.get("title", scenario["id"]),
         "blackbox": stack.get("blackbox", False),
         "path": {"phone": "phone (SIP/PSTN)", "bridge": "provider web API"}.get(stack["kind"], "LiveKit WebRTC"),
+        "local_only": LOCAL_ONLY,  # BENCH_LOCAL_ONLY: LiveKit server on this machine, no vendor keys
     }
     (run_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     (run_dir / "scenario.json").write_text(json.dumps(scenario, ensure_ascii=False, indent=1))

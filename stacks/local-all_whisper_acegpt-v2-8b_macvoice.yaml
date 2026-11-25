@@ -1,0 +1,14 @@
+# AceGPT v2 8B Chat (KAUST + CUHK-Shenzhen, Saudi-led) as the brain, everything else identical to the all-local
+# baseline (Whisper turbo STT + macOS voices on this Mac).
+# Pull once: ollama pull hf.co/mradermacher/AceGPT-v2-8B-Chat-GGUF:Q4_K_M
+name: Whisper turbo (local) · AceGPT v2 8B (local) · macOS voices
+display: AceGPT v2 8B · Saudi (KAUST)
+display_sub: AceGPT v2 8B on a Mac · local speech
+provider: local (acegpt-v2-8b)
+kind: pipeline
+stt: {plugin: localspeech}
+llm: {plugin: ollama, model: 'hf.co/mradermacher/AceGPT-v2-8B-Chat-GGUF:Q4_K_M', max_tokens: 220}
+tts: {plugin: localspeech, voice: auto}
+turn_detection: turn-detector
+notes: 'LLM test on local hardware: only the LLM differs from local-all_whisper_qwen3-8b_macvoice. Community Q4_K_M
+  quantisation (mradermacher) on an M4 Pro, so speed and quality are below a hosted deployment.'

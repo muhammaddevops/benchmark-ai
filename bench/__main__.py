@@ -11,6 +11,7 @@
   python -m bench charts [-s <stack> ...] [-c <scenario> ...] [--since YYYY-MM-DD] [--name NAME]
   python -m bench montage -s <stack> -s <stack> ... -c <scenario> [--turns 0-1] [--format landscape]
   python -m bench report                                 rebuild results/index.html
+  python -m bench fullreport -s <stack> ... [--since D] [--sample]   written report across systems (HTML + PDF)
   python -m bench serve [--port 8765]                    serve results/ over http
   python -m bench worker                                 run the agent-under-test worker in the foreground
 """
@@ -87,6 +88,17 @@ def main() -> None:
     mo.add_argument("--format", default="landscape", choices=["landscape", "square", "vertical"])
     mo.add_argument("--name")
     mo.add_argument("--title")
+    mo.add_argument("--since", help="only runs from this date on (YYYY-MM-DD)")
+    mo.add_argument("--end-card", help="YAML/JSON card shown last (an offer or contact card)")
+    fr = sub.add_parser("fullreport", help="written evaluation report across systems (HTML + PDF)")
+    fr.add_argument("-s", "--stack", action="append", required=True)
+    fr.add_argument("--since", help="only runs from this date on (YYYY-MM-DD)")
+    fr.add_argument("--title")
+    fr.add_argument("--subtitle")
+    fr.add_argument("--prepared-for")
+    fr.add_argument("--notes", help="your written recommendation (Markdown-ish), shown first")
+    fr.add_argument("--sample", action="store_true", help="mark it as a sample report")
+    fr.add_argument("--name")
     sub.add_parser("report")
     s = sub.add_parser("serve")
     s.add_argument("--port", type=int, default=8765)
@@ -211,7 +223,13 @@ def main() -> None:
         from .montage import build
         from .video import parse_turns
 
-        print(build(args.stack, args.scenario, turns=parse_turns(args.turns), fmt=args.format, name=args.name, title=args.title))
+        print(build(args.stack, args.scenario, turns=parse_turns(args.turns), fmt=args.format, name=args.name, title=args.title,
+                    since=args.since, end_card=args.end_card))
+    elif args.cmd == "fullreport":
+        from .fullreport import build as build_full
+
+        print(build_full(args.stack, since=args.since, title=args.title, subtitle=args.subtitle,
+                         prepared_for=args.prepared_for, notes=args.notes, sample=args.sample, name=args.name))
     elif args.cmd == "report":
         from .report import write_index, write_run_report
 
