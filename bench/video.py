@@ -57,8 +57,9 @@ def _envelope(ch: np.ndarray, fps: int) -> list[float]:
     return [round(float(a), 3) for a in v]
 
 
-def timeline(run_dir: Path, turns: tuple[int, int] | None = None) -> dict[str, Any]:
-    """Speech events on the original call clock."""
+def timeline(run_dir: Path, turns: tuple[int, int] | None = None, max_reply: float | None = None) -> dict[str, Any]:
+    """Speech events on the original call clock. With max_reply, an agent reply longer than that plays only its first
+    max_reply seconds (its caption still shows the whole reply and says how long it ran); response gaps stay whole."""
     m, meta, call = _load(run_dir)
     rows = m["turns"]
     if turns:
@@ -79,6 +80,13 @@ def timeline(run_dir: Path, turns: tuple[int, int] | None = None) -> dict[str, A
         if not r.get("interrupt") and not r.get("talk_over"):  # an agent talking over the caller has no gap to time
             gaps.append({"start": r["t_end"], "end": r["onset"] if r.get("onset") is not None else r["t_end"] + 8,
                          "latency_ms": r.get("latency_ms"), "no_response": bool(r.get("no_response"))})
+    if max_reply:
+        for e in agent:
+            full = e["end"] - e["start"]
+            barged = any(e["start"] + max_reply < c["start"] < e["end"] for c in caller)
+            if full > max_reply + 1.5 and not barged:
+                e["end"] = e["start"] + max_reply
+                e["reply_lang_label"] += f" · first {max_reply:.0f} s of {full:.0f} s"
     end = max([e["end"] for e in caller + agent] + [g["end"] for g in gaps]) + 0.8
     start = 0.0 if not turns or turns[0] == 0 else max(0.0, caller[0]["start"] - 0.8)
     return {"caller": caller, "agent": agent, "gaps": gaps, "start": start, "end": end, "metrics": m, "meta": meta}
@@ -101,6 +109,18 @@ def plan_cuts(tl: dict[str, Any], gap: float) -> list[Cut]:
     return [c for c in segs if c.end > c.start]
 
 
+def _fade(piece: np.ndarray, sec: float = 0.04) -> np.ndarray:
+    """Short fade at both ends of a kept segment, so a cut inside speech doesn't click."""
+    n = min(int(sec * SAMPLE_RATE), len(piece) // 2)
+    if n < 2:
+        return piece
+    out = piece.astype(np.float32)
+    ramp = np.linspace(0.0, 1.0, n, dtype=np.float32)[:, None]
+    out[:n] *= ramp
+    out[-n:] *= ramp[::-1]
+    return out.astype(piece.dtype)
+
+
 def _result_card(m: dict[str, Any]) -> dict[str, Any]:
     s = m["summary"]
     cs = (s.get("caller_score") or {}).get("score")
@@ -118,8 +138,9 @@ def _result_card(m: dict[str, Any]) -> dict[str, Any]:
     return {"score": round(cs) if cs is not None else None, "cells": cells, "note": note}
 
 
-def build_data(run_dir: Path, turns: tuple[int, int] | None, gap: float, fps: int, label: str | None) -> tuple[dict[str, Any], list[Cut], np.ndarray]:
-    tl = timeline(run_dir, turns)
+def build_data(run_dir: Path, turns: tuple[int, int] | None, gap: float, fps: int, label: str | None,
+               max_reply: float | None = None) -> tuple[dict[str, Any], list[Cut], np.ndarray]:
+    tl = timeline(run_dir, turns, max_reply)
     m, meta = tl["metrics"], tl["meta"]
     stack = meta.get("stack", {})
     audio = _audio(run_dir)
@@ -142,7 +163,7 @@ def build_data(run_dir: Path, turns: tuple[int, int] | None, gap: float, fps: in
     def remap_ev(e: dict[str, Any]) -> dict[str, Any]:
         return {**e, "start": round(remap(e["start"]), 3), "end": round(remap(e["end"]), 3)}
 
-    pieces = [audio[int(c.start * SAMPLE_RATE) : int(c.end * SAMPLE_RATE)] for c in cuts]
+    pieces = [_fade(audio[int(c.start * SAMPLE_RATE) : int(c.end * SAMPLE_RATE)]) for c in cuts]
     clip = np.concatenate(pieces) if pieces else audio[:0]
     provider = label or stack.get("display") or stack.get("name", stack.get("id", "Voice agent"))
     chips = [meta.get("scenario_title") or m.get("scenario_id", ""), "Via " + meta.get("path", "LiveKit WebRTC")]
@@ -164,10 +185,11 @@ def build_data(run_dir: Path, turns: tuple[int, int] | None, gap: float, fps: in
 
 
 def render(run_dir: Path, fmt: str = "landscape", turns: tuple[int, int] | None = None, gap: float = 0.8,
-           fps: int = 25, end_card: float = 4.0, out: Path | None = None, label: str | None = None) -> Path:
+           fps: int = 25, end_card: float = 4.0, out: Path | None = None, label: str | None = None,
+           max_reply: float | None = None) -> Path:
     from playwright.sync_api import sync_playwright
 
-    data, cuts, clip = build_data(run_dir, turns, gap, fps, label)
+    data, cuts, clip = build_data(run_dir, turns, gap, fps, label, max_reply)
     w, h = SIZES[fmt]
     videos = run_dir / "video"
     videos.mkdir(exist_ok=True)

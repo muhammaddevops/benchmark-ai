@@ -89,6 +89,7 @@ def collect(stacks: list[str] | None = None, scenarios: list[str] | None = None,
             "task": round(100 * statistics.mean(task)) if task else None,
             "path": ms[0]["summary"].get("path", "LiveKit WebRTC"),
             "blackbox": bool(ms[0]["summary"].get("blackbox")),
+            "local": all(m.get("local_only") for m in ms),
         }
         for code, _, _ in LANGS:
             lv = [t["latency_ms"] for t in turns if t.get("lang") == code and t.get("latency_ms") is not None
@@ -140,7 +141,9 @@ def _data(rows: list[dict[str, Any]], kicker: str) -> dict[str, Any]:
         "charts": chart_specs(rows),
         "foot1": f"<b>{calls} scripted mock calls</b> · {len(rows)} systems · Saudi/Gulf caller in English, Gulf Arabic, "
                  f"MSA and code-switched speech · connected via {', '.join(paths)}",
-        "foot2": f"Response times include the network path to each provider · {judge_note} · systems without complete judge "
+        "foot2": ("All calls ran on one Mac (no internet round trip)" if rows and all(r.get("local") for r in rows)
+                  else "Response times include the network path to each provider")
+                 + f" · {judge_note} · systems without complete judge "
                  "scores are left out of the overall score",
     }
 

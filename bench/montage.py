@@ -4,6 +4,8 @@ animated benchmark charts -> method card -> optional end card.
   python -m bench montage -s <stack> -s <stack> ... -c <scenario> [--turns 0-1] [--format landscape|square|vertical]
                           [--since 2026-11-25] [--end-card card.yaml]
 
+--max-reply N plays only the first N seconds of each long agent reply (the caption shows all of it and how long it
+ran; response times are never shortened), for a cut short enough for social media.
 --since keeps only runs from that date on (clips and charts), so a re-run batch isn't mixed with older calls.
 --end-card is a YAML/JSON file with the card fields (kicker, title, ar, lede, items, cta, foot, seconds): an offer or a
 contact card. Keep it outside the repo (e.g. results/), since it is your own text.
@@ -86,7 +88,7 @@ def concat(parts: list[Path], out: Path, fmt: str) -> Path:
 
 def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 1), fmt: str = "landscape",
           name: str | None = None, title: str | None = None, since: str | None = None,
-          end_card: Path | None = None) -> Path:
+          end_card: Path | None = None, max_reply: float | None = None) -> Path:
     name = name or f"{datetime.now():%Y%m%d}-{scenario}-{fmt}"
     out_dir = RESULTS_DIR / "videos" / name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -111,7 +113,7 @@ def build(stacks: list[str], scenario: str, turns: tuple[int, int] | None = (0, 
 
     for i, s in enumerate(stacks, 1):
         clip = out_dir / f"{i:02d}_{s}.mp4"
-        render(runs[s], fmt, turns=turns, end_card=3.0, out=clip, label=labels[s])
+        render(runs[s], fmt, turns=turns, end_card=3.0, out=clip, label=labels[s], max_reply=max_reply)
         parts.append(clip)
 
     rows = collect(stacks=stacks, since=since)

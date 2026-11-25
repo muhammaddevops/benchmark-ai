@@ -16,6 +16,7 @@ import json
 import re
 import statistics
 from datetime import datetime
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +37,11 @@ def e(x: Any) -> str:
 def _num(v: Any, unit: str = "", nd: int = 0) -> str:
     if v is None:
         return "–"
-    return f"{v:.{nd}f}{unit}" if isinstance(v, (int, float)) else e(v)
+    if not isinstance(v, (int, float)):
+        return e(v)
+    # round half up, like the charts (Python's own rounding sends 50.5 to 50)
+    q = Decimal(str(v)).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP)
+    return f"{q}{unit}"
 
 
 def _md(text: str) -> str:
@@ -204,6 +209,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
             "scenarios": sorted(by),
             "judges": sorted({(m.get("judge") or {}).get("model", "") for m in ms} - {""}),
             "score": round(statistics.mean(m["summary"]["caller_score"]["score"] for m in ms), 1),
+            "score_exact": statistics.mean(m["summary"]["caller_score"]["score"] for m in ms),
             "p50": round(_pct(lat, 0.5) / 1000, 2) if lat else None,
             "p90": round(_pct(lat, 0.9) / 1000, 2) if lat else None,
             "language": round(100 * sum(lang_ok) / len(lang_ok)) if lang_ok else None,
@@ -217,7 +223,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
             vals = [v for v in (m["summary"]["caller_score"]["parts"].get(k) for m in ms) if v is not None]
             row[f"part_{k}"] = round(statistics.mean(vals), 1) if vals else None
         rows[s] = row
-    ranked = sorted((rows[s] for s in stacks), key=lambda r: -r["score"])
+    ranked = sorted((rows[s] for s in stacks), key=lambda r: -r["score_exact"])
     for i, r in enumerate(ranked, 1):
         r["rank"] = i
         try:
@@ -241,8 +247,8 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
     best_task = max((r for r in ranked if r.get("task") is not None), key=lambda r: r["task"], default=None)
     top = ranked[0]
     findings = [
-        f"<strong>{e(top['label'])}</strong> has the highest caller score, {top['score']:.0f}/100"
-        + (f", ahead of {e(ranked[1]['label'])} ({ranked[1]['score']:.0f})." if len(ranked) > 1 else "."),
+        f"<strong>{e(top['label'])}</strong> has the highest caller score, {_num(top['score'])}/100"
+        + (f", ahead of {e(ranked[1]['label'])} ({_num(ranked[1]['score'])})." if len(ranked) > 1 else "."),
     ]
     if fastest:
         findings.append(f"Fastest to answer: <strong>{e(fastest['label'])}</strong>, {fastest['p50']:.1f} s median "
@@ -263,7 +269,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
 
     rank_rows = "".join(
         f"<tr><td class='n'>{r['rank']}</td><td><strong>{e(r['label'])}</strong><div class='sub'>{e(r['display_sub'])}</div></td>"
-        f"<td class='n big'>{r['score']:.0f}</td><td class='n'>{_num(r.get('p50'), ' s', 1)}</td>"
+        f"<td class='n big'>{_num(r['score'])}</td><td class='n'>{_num(r.get('p50'), ' s', 1)}</td>"
         f"<td class='n'>{_num(r.get('p90'), ' s', 1)}</td><td class='n'>{_num(r.get('language'), '%')}</td>"
         f"<td class='n'>{_num(r.get('quality'), '', 1)}</td><td class='n'>{_num(r.get('task'), '%')}</td>"
         f"<td class='n'>{_num(r.get('reliability'))}</td><td class='n'>{_num(r.get('unanswered'), '%')}</td></tr>"
@@ -280,7 +286,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
             call = calls.get(r["id"], {}).get(c)
             v = call["m"]["summary"]["caller_score"]["score"] if call else None
             cells += f"<td class='n heat'{_heat(v)}>{_num(v)}</td>"
-        heat_rows += f"<tr><td>{e(r['label'])}</td>{cells}<td class='n'><strong>{r['score']:.0f}</strong></td></tr>"
+        heat_rows += f"<tr><td>{e(r['label'])}</td>{cells}<td class='n'><strong>{_num(r['score'])}</strong></td></tr>"
 
     scen_sections = ""
     for c in scen_ids:
@@ -294,7 +300,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
                 continue
             s = call["m"]["summary"]
             j = call["m"].get("judge") or {}
-            body += (f"<tr><td><strong>{e(r['label'])}</strong></td><td class='n'>{s['caller_score']['score']:.0f}</td>"
+            body += (f"<tr><td><strong>{e(r['label'])}</strong></td><td class='n'>{_num(s['caller_score']['score'])}</td>"
                      f"<td class='n'>{_num((s.get('latency_p50_ms') or 0) / 1000 if s.get('latency_p50_ms') else None, ' s', 1)}</td>"
                      f"<td class='n'>{_num(100 * s['spoken_lang_accuracy'] if s.get('spoken_lang_accuracy') is not None else None, '%')}</td>"
                      f"<td class='n'>{_num(s.get('judge_overall'))}</td>"
@@ -330,7 +336,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
         )
         profiles += f"""<section class="profile">
 <div class="ph"><div><div class="rank">#{r['rank']}</div><h3>{e(r['label'])}</h3><div class="sub">{e(r['display_sub'])}</div></div>
-<div class="score">{r['score']:.0f}<span>/100</span></div></div>
+<div class="score">{_num(r['score'])}<span>/100</span></div></div>
 <div class="parts">{parts}</div>
 <div class="cols"><div><h4>What it did well</h4><ul>{''.join(f'<li>{e(s)}</li>' for s in strengths[:4]) or '<li>–</li>'}</ul></div>
 <div><h4>Where it fell short</h4><ul>{''.join(f'<li>{e(s)}</li>' for s in weaknesses[:4]) or '<li>–</li>'}</ul></div></div>
@@ -348,7 +354,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
             rep = call["dir"] / "report.html"
             link = f"<a href='{e(rep.as_uri())}'>{e(call['dir'].name)}</a>" if rep.exists() else e(call["dir"].name)
             app_rows += (f"<tr><td>{e(r['label'])}</td><td>{e(scen_titles[c])}</td><td>{e((call['m'].get('date') or '')[:16])}</td>"
-                         f"<td class='n'>{s['caller_score']['score']:.0f}</td><td class='n'>{s.get('turns', '')}</td>"
+                         f"<td class='n'>{_num(s['caller_score']['score'])}</td><td class='n'>{s.get('turns', '')}</td>"
                          f"<td class='mono'>{link}</td></tr>")
 
     weights = "".join(f"<tr><td>{lbl}</td><td class='n'>{w}%</td><td>{e(how)}</td></tr>" for (k, lbl, w), how in zip(WEIGHTS, [
@@ -380,7 +386,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
   <h1>{e(title)}</h1>
   <p class="lede">{e(subtitle)}</p>
   <div class="meta"><div>{e(prepared)}</div><div>Calls placed {e(period)}</div><div>Issued {datetime.now():%d %B %Y}</div></div>
-  <div class="cover-scores">{''.join(f"<div><span>{r['score']:.0f}</span>{e(r['label'])}</div>" for r in ranked[:4])}</div>
+  <div class="cover-scores">{''.join(f"<div><span>{_num(r['score'])}</span>{e(r['label'])}</div>" for r in ranked[:4])}</div>
 </section>
 
 <section class="pagebreak">

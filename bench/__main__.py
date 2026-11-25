@@ -9,7 +9,7 @@
   python -m bench rejudge [-s <stack>] [-c <scenario>]   re-score runs with the current judge (one judge per comparison)
   python -m bench video <run|latest> [--format landscape|square|vertical] [--turns 0-2] [--gap 0.8] [--label "Name"]
   python -m bench charts [-s <stack> ...] [-c <scenario> ...] [--since YYYY-MM-DD] [--name NAME]
-  python -m bench montage -s <stack> -s <stack> ... -c <scenario> [--turns 0-1] [--format landscape]
+  python -m bench montage -s <stack> -s <stack> ... -c <scenario> [--turns 0-1] [--format landscape] [--max-reply 6]
   python -m bench report                                 rebuild results/index.html
   python -m bench fullreport -s <stack> ... [--since D] [--sample]   written report across systems (HTML + PDF)
   python -m bench serve [--port 8765]                    serve results/ over http
@@ -90,6 +90,7 @@ def main() -> None:
     mo.add_argument("--title")
     mo.add_argument("--since", help="only runs from this date on (YYYY-MM-DD)")
     mo.add_argument("--end-card", help="YAML/JSON card shown last (an offer or contact card)")
+    mo.add_argument("--max-reply", type=float, help="play only the first N s of each long agent reply (short cut)")
     fr = sub.add_parser("fullreport", help="written evaluation report across systems (HTML + PDF)")
     fr.add_argument("-s", "--stack", action="append", required=True)
     fr.add_argument("--since", help="only runs from this date on (YYYY-MM-DD)")
@@ -224,7 +225,7 @@ def main() -> None:
         from .video import parse_turns
 
         print(build(args.stack, args.scenario, turns=parse_turns(args.turns), fmt=args.format, name=args.name, title=args.title,
-                    since=args.since, end_card=args.end_card))
+                    since=args.since, end_card=args.end_card, max_reply=args.max_reply))
     elif args.cmd == "fullreport":
         from .fullreport import build as build_full
 

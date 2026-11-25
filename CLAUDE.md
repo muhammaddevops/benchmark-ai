@@ -51,6 +51,8 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
 6. **Charts**: `.venv/bin/python -m bench charts -s <a> -s <b> ... --name <name>` → PNGs (landscape, square,
    4:5 portrait), interactive `index.html` with a table, `leaderboard.csv`, `charts_landscape.mp4`.
    **Comparison video**: `.venv/bin/python -m bench montage -s <a> -s <b> ... -c clinic_booking_codeswitch --format square`.
+   With many systems or wordy local models, `--turns 0-0 --max-reply 6` keeps it near 4 min for 8 systems (only the
+   first 6 s of each long reply plays; the caption says how long it ran; response gaps are never cut).
 7. **Report back**: what X is good or bad at, with numbers (caller score, typical and slow-end response time,
    right-language rate, quality, task success) and an example turn, plus the video/chart paths.
 
