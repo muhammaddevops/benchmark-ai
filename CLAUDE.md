@@ -96,7 +96,11 @@ Outputs in `results/` (git-ignored): `runs/<run>/` (call.wav, metrics.json, repo
 - Costs: ElevenLabs characters, provider usage, Twilio per minute. Fanar's default TTS quota is ~20 requests/day.
 - Hume shuts down its TTS/agent APIs on 2026-11-13: not included.
 - Keep the Mac awake: `bench run` holds `caffeinate` on macOS (a sleep on 2026-11-10 stalled a call for 4 h).
-  Invalid runs go to `results/runs_excluded/` (not charted) with a note in its README.
+  Invalid runs go to `results/runs_excluded/` (not charted) with a note in its README. A call where the agent
+  greeted, logged no errors and then never answered within the caller's 12 s wait counts (score 0: the agent was
+  too slow, e.g. Jais 3 reasoning); one whose agent logged errors and never answered doesn't (`charts.valid`).
+- The judge checks its own answer's format and asks again (3 tries; `schema_ok` in judge.json): small local judges
+  sometimes invent their own keys, which used to leave a call without quality or task scores.
 - Local Gulf models (2026-11-10): ALLaM 7B, Fanar 1 9B, Falcon-H1 7B, Falcon 3 7B run fine in Ollama; Jais 3 7B is a
   reasoning model (template always thinks; ~8-23 s per reply on the Mac); `think: true` + a big `max_tokens`.
   The local `qwen3:14b` judge is lenient on broken Arabic (it rated Falcon 3's garbled replies "natural"): use a

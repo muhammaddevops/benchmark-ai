@@ -35,9 +35,15 @@ def _pct(vals: list[float], q: float) -> float | None:
 
 
 def valid(m: dict[str, Any]) -> bool:
+    """A call counts if the agent answered at least once, or if it was up (it greeted, no errors logged) and simply
+    never answered in time: that is the agent's failure (score 0), not a broken recording. A call whose agent logged
+    errors and never answered (credits out, a crash) doesn't count."""
     s = m.get("summary", {})
+    if (s.get("caller_score") or {}).get("score") is None:
+        return False
     answered = [t for t in m.get("turns", []) if t.get("onset") is not None]
-    return bool(answered) and (s.get("caller_score") or {}).get("score") is not None
+    up = s.get("greeting_onset_s") is not None and not s.get("errors")
+    return bool(answered) or up
 
 
 def collect(stacks: list[str] | None = None, scenarios: list[str] | None = None, since: str | None = None) -> list[dict[str, Any]]:

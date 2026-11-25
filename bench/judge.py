@@ -38,6 +38,22 @@ Score strictly and concretely. Return ONLY JSON:
 }"""
 
 
+RETRY = ("\n\nIMPORTANT: your previous answer did not follow the format. Use exactly the keys turns, task_success, "
+         "overall_score, strengths, weaknesses and summary, with one entry in turns per transcript turn.")
+
+
+def _missing(d: dict[str, Any]) -> int:
+    """How many required parts of the judge's answer are missing or malformed (0 = usable)."""
+    n = 0
+    turns = d.get("turns")
+    if not isinstance(turns, list) or not turns or not all(isinstance(t, dict) and "correct" in t for t in turns):
+        n += 2
+    for k in ("task_success", "overall_score"):
+        if not isinstance(d.get(k), (int, float)):
+            n += 1
+    return n
+
+
 async def judge_run(scenario: dict[str, Any], rows: list[dict[str, Any]], meta: dict[str, Any]) -> dict[str, Any]:
     transcript = [
         {
@@ -61,7 +77,19 @@ async def judge_run(scenario: dict[str, Any], rows: list[dict[str, Any]], meta: 
         user += ("\n\nNOTE: this agent is a black box (a hosted platform reached by phone or web). agent_heard and "
                  "agent_reply are unavailable; judge from caller_said and agent_spoken only.")
     b = backend("BENCH_JUDGE")
-    data = parse_json(await chat(b, SYSTEM, user, json_mode=True))
+    # Small local judges sometimes answer with their own keys ("overall", "task_completion"), which would leave the
+    # caller score without quality or task: check the shape and ask again (up to 3 tries), keeping the best answer.
+    data: dict[str, Any] = {}
+    for attempt in range(3):
+        try:
+            got = parse_json(await chat(b, SYSTEM, user + (RETRY if attempt else ""), json_mode=True))
+        except ValueError:
+            got = {}
+        if _missing(got) < _missing(data) or not data:
+            data = got
+        if not _missing(data):
+            break
+    data["schema_ok"] = not _missing(data)
     dia = [t.get("dialect_ok") for t in data.get("turns", []) if t.get("dialect_ok") is not None]
     data["dialect_accuracy"] = round(sum(bool(x) for x in dia) / len(dia), 3) if dia else None
     data["model"] = b.label

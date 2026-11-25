@@ -40,13 +40,19 @@ def _num(v: Any, unit: str = "", nd: int = 0) -> str:
 
 
 def _md(text: str) -> str:
-    """Tiny Markdown subset for the evaluator's notes: ## headings, - bullets, **bold**, paragraphs."""
-    out, items = [], []
+    """Tiny Markdown subset for the evaluator's notes: ## headings, - bullets (wrapped lines indented), **bold**, and
+    paragraphs (wrapped lines join, as in Markdown)."""
+    out: list[str] = []
+    items: list[str] = []
+    para: list[str] = []
 
     def inline(s: str) -> str:
         return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", e(s))
 
     def flush() -> None:
+        if para:
+            out.append(f"<p>{inline(' '.join(para))}</p>")
+            para.clear()
         if items:
             out.append("<ul>" + "".join(f"<li>{inline(i)}</li>" for i in items) + "</ul>")
             items.clear()
@@ -54,13 +60,18 @@ def _md(text: str) -> str:
     for block in re.split(r"\n\s*\n", text.strip()):
         for line in block.splitlines():
             if line.startswith("- "):
-                items.append(line[2:])
+                if para:
+                    flush()
+                items.append(line[2:].strip())
             elif line.startswith("## "):
                 flush()
                 out.append(f"<h3>{inline(line[3:])}</h3>")
+            elif items and line[:1].isspace():
+                items[-1] += " " + line.strip()
             else:
-                flush()
-                out.append(f"<p>{inline(line)}</p>")
+                if items:
+                    flush()
+                para.append(line.strip())
         flush()
     return "\n".join(out)
 
@@ -123,7 +134,8 @@ def _turn_html(t: dict[str, Any], kind: str, scen_title: str) -> str:
     if t.get("expect") in ("en", "ar"):
         ok = t.get("spoken_lang_ok", t.get("lang_ok"))
         want = "English" if t["expect"] == "en" else "Arabic"
-        facts.append(f"{want} expected: {'yes' if ok else 'no'}")
+        if not t.get("no_response"):
+            facts.append(f"answered in {want}" if ok else f"not in {want}, the caller's language")
     if j.get("issue"):
         facts.append(f"judge: {j['issue']}")
     return f"""<div class="turn {kind}">
@@ -198,6 +210,8 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
             "quality": round(statistics.mean(judge), 1) if judge else None,
             "task": round(100 * statistics.mean(task)) if task else None,
             "reliability": round(statistics.mean(m["summary"]["caller_score"]["parts"].get("reliability", 0) for m in ms)),
+            # replies that never came (the caller waits 12 s, then carries on): the median above can't show these
+            "unanswered": round(100 * sum(bool(t.get("no_response")) for t in turns) / len(turns)) if turns else None,
         }
         for k in ("speed", "language", "quality", "task"):
             vals = [v for v in (m["summary"]["caller_score"]["parts"].get(k) for m in ms) if v is not None]
@@ -238,9 +252,13 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
                         f"{best_lang['language']}% of turns.")
     if best_task:
         findings.append(f"Most complete calls: <strong>{e(best_task['label'])}</strong>, {best_task['task']}% task success.")
+    mute = [r for r in ranked if (r.get("unanswered") or 0) >= 20]
+    if mute:
+        findings.append("Left callers waiting: " + ", ".join(
+            f"<strong>{e(r['label'])}</strong> never answered {r['unanswered']}% of turns within 12 s" for r in mute) + ".")
     slow = [r for r in ranked if r.get("p50") is not None and r["p50"] >= 3.0]
     if slow:
-        findings.append(f"{len(slow)} of {len(ranked)} systems took 3 s or more to answer at the median, which callers "
+        findings.append(("All " if len(slow) == len(ranked) else f"{len(slow)} of ") + f"{len(ranked)} systems took 3 s or more to answer at the median, which callers "
                         "hear as a dead line; on speed they score zero.")
 
     rank_rows = "".join(
@@ -248,7 +266,7 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
         f"<td class='n big'>{r['score']:.0f}</td><td class='n'>{_num(r.get('p50'), ' s', 1)}</td>"
         f"<td class='n'>{_num(r.get('p90'), ' s', 1)}</td><td class='n'>{_num(r.get('language'), '%')}</td>"
         f"<td class='n'>{_num(r.get('quality'), '', 1)}</td><td class='n'>{_num(r.get('task'), '%')}</td>"
-        f"<td class='n'>{_num(r.get('reliability'))}</td><td class='n'>{r['n']}</td></tr>"
+        f"<td class='n'>{_num(r.get('reliability'))}</td><td class='n'>{_num(r.get('unanswered'), '%')}</td></tr>"
         for r in ranked
     )
 
@@ -371,9 +389,10 @@ def build(stacks: list[str], since: str | None = None, title: str | None = None,
 <ul class="findings">{''.join(f'<li>{f}</li>' for f in findings)}</ul>
 <table class="ranking"><thead><tr><th class='n'>#</th><th>System</th><th class='n'>Caller score</th><th class='n'>Median reply</th>
 <th class='n'>Slowest 10%</th><th class='n'>Right language</th><th class='n'>Quality /10</th><th class='n'>Task</th>
-<th class='n'>Reliability</th><th class='n'>Calls</th></tr></thead><tbody>{rank_rows}</tbody></table>
+<th class='n'>Reliability</th><th class='n'>No answer</th></tr></thead><tbody>{rank_rows}</tbody></table>
 <p class="muted small">Caller score /100 = speed 25% + language 20% + quality 25% + task 20% + reliability 10%, averaged over each
-system's calls. It uses only what the caller experiences, so every system is scored the same way.</p>
+system's calls. It uses only what the caller experiences, so every system is scored the same way. Response times count
+answered turns only; a turn with no reply within 12 s counts under "No answer" (the caller then says their next line).</p>
 </section>
 
 <section class="pagebreak">
