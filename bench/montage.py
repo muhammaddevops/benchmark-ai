@@ -5,7 +5,7 @@ animated benchmark charts -> method card -> optional end card.
                           [--since 2026-11-25] [--end-card card.yaml]
 
 --since keeps only runs from that date on (clips and charts), so a re-run batch isn't mixed with older calls.
---end-card is a YAML/JSON file with the card fields (kicker, title, ar, lede, items, foot, seconds): an offer or a
+--end-card is a YAML/JSON file with the card fields (kicker, title, ar, lede, items, cta, foot, seconds): an offer or a
 contact card. Keep it outside the repo (e.g. results/), since it is your own text.
 
 Each provider's clip comes from its latest valid run of the scenario (render a call with `bench video` first if you

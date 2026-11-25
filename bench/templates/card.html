@@ -18,6 +18,9 @@
   p.lede { font-size: calc(30 * var(--u)); color: var(--muted); margin-top: calc(26 * var(--u)); line-height: 1.4; max-width: calc(1400 * var(--u)); }
   ul { list-style: none; display: flex; flex-wrap: wrap; gap: calc(14 * var(--u)); margin-top: calc(40 * var(--u)); }
   li { font-size: calc(24 * var(--u)); font-weight: 600; border: calc(2 * var(--u)) solid var(--line); border-radius: 999px; padding: calc(10 * var(--u)) calc(22 * var(--u)); color: var(--text); }
+  .cta { display: none; margin-top: calc(44 * var(--u)); font-size: calc(36 * var(--u)); font-weight: 800; color: var(--bg);
+    background: var(--accent); border-radius: calc(14 * var(--u)); padding: calc(18 * var(--u)) calc(30 * var(--u)); justify-self: start; }
+  .cta.on { display: inline-block; }
   .foot { position: absolute; left: calc(110 * var(--u)); right: calc(110 * var(--u)); bottom: calc(70 * var(--u)); font-size: calc(20 * var(--u)); color: var(--dim); line-height: 1.5; }
 </style>
 </head>
@@ -28,6 +31,7 @@
   <div class="ar" id="ar" dir="rtl"></div>
   <p class="lede" id="lede"></p>
   <ul id="items"></ul>
+  <div class="cta" id="cta"></div>
   <div class="foot" id="foot"></div>
 </div>
 <script>
@@ -40,6 +44,7 @@ window.setup = function (c, fmt) {
   document.getElementById('lede').textContent = c.lede || '';
   const ul = document.getElementById('items'); ul.innerHTML = '';
   for (const it of c.items || []) { const li = document.createElement('li'); li.textContent = it; ul.appendChild(li); }
+  const cta = document.getElementById('cta'); cta.textContent = c.cta || ''; cta.classList.toggle('on', !!c.cta);
   document.getElementById('foot').textContent = c.foot || '';
   return document.fonts.ready.then(() => true);
 };
